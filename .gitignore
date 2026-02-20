@@ -46,3 +46,8 @@ Thumbs.db
 # === SUPABASE ===
 supabase/.branches
 supabase/.temp
+
+# === CREDENCIALES TEMPORALES (NUNCA COMMITEAR) ===
+*git-creds*.txt
+git-creds.txt
+Usersahuet*.txt

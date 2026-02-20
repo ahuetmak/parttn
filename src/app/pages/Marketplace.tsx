@@ -4,7 +4,6 @@ import { Diamond, Shield, Clock, TrendingUp, Award, Filter, Search, Users, Build
 import { motion } from 'motion/react';
 import { projectId, publicAnonKey } from '/utils/supabase/info';
 import { useAuth } from '../context/AuthContext';
-import { marketplaceAPI } from '../../lib/api';
 
 export function Marketplace() {
   const navigate = useNavigate();

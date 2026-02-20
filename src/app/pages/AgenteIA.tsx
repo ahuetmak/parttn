@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Cpu, Zap, ChevronRight, Copy, Check, Diamond, Shield,
@@ -166,6 +167,7 @@ const MISIONES_RAPIDAS = [
 // ── Componente principal ──────────────────────────────────────────────────────
 export function AgenteIA() {
   const { user, userProfile } = useAuth();
+  const [searchParams] = useSearchParams();
 
   // Form state
   const [paso, setPaso] = useState<1 | 2 | 3>(1);
@@ -185,6 +187,22 @@ export function AgenteIA() {
 
   const [activeScript, setActiveScript] = useState<'completo' | 'secciones'>('secciones');
   const [copiedFull, setCopiedFull] = useState(false);
+
+  // Pre-llenar desde URL params (cuando viene del Marketplace)
+  useEffect(() => {
+    const mision = searchParams.get('mision');
+    const precio = searchParams.get('precio');
+    const comision = searchParams.get('comision');
+    if (mision || precio) {
+      setForm(f => ({
+        ...f,
+        ...(mision ? { productoNombre: mision } : {}),
+        ...(precio ? { precioProducto: precio } : {}),
+        ...(comision ? { comisionSocio: comision } : {}),
+      }));
+      if (mision) toast.info(`Misión cargada: "${mision}"`);
+    }
+  }, [searchParams]);
 
   const handleChange = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 

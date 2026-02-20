@@ -25,6 +25,7 @@ import { projectId, publicAnonKey } from '/utils/supabase/info';
 
 const menuItems = [
   { path: '/app/marketplace', icon: ShoppingBag, label: 'Marketplace' },
+  { path: '/app/agente-ia', icon: Bot, label: 'Agente IA', badge: 'NEW' },
   { path: '/app/work', icon: Hammer, label: 'Work' },
   { path: '/app/salas', icon: Shield, label: 'Salas Digitales' },
   { path: '/app/aplicaciones', icon: Briefcase, label: 'Aplicaciones' },
@@ -271,6 +272,11 @@ export function AppLayout() {
                 )}
                 <Icon className={`w-5 h-5 relative z-10 ${isActive ? 'drop-shadow-[0_0_8px_rgba(0,242,166,0.5)]' : ''}`} />
                 <span className="font-semibold relative z-10">{item.label}</span>
+                {(item as any).badge && !isActive && (
+                  <span className="ml-auto bg-gradient-to-r from-[#00F2A6] to-[#0EA5E9] text-black text-[10px] font-black px-1.5 py-0.5 rounded-full relative z-10 uppercase tracking-wider">
+                    {(item as any).badge}
+                  </span>
+                )}
                 {item.path === '/app/notificaciones' && unreadCount > 0 && (
                   <span className="ml-auto bg-[#00F2A6] text-black text-xs font-bold px-2 py-0.5 rounded-full relative z-10">
                     {unreadCount > 9 ? '9+' : unreadCount}
