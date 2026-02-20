@@ -3,9 +3,52 @@ import React from 'react';
 interface LogoProps {
   className?: string;
   size?: number;
+  variant?: 'icon' | 'glow' | 'full';
+  withGlow?: boolean;
 }
 
-export function Logo({ className = '', size = 40 }: LogoProps) {
+// Logo SVG fiel al original: diamante rotado 45° con T interior + glow neón cian
+export function Logo({ className = '', size = 40, variant = 'icon', withGlow = false }: LogoProps) {
+  // Variante con imagen PNG real (máximo impacto visual)
+  if (variant === 'glow') {
+    return (
+      <img
+        src="/logo-glow.png"
+        alt="PARTTH"
+        width={size}
+        height={size}
+        className={className}
+        style={{ objectFit: 'contain' }}
+        draggable={false}
+      />
+    );
+  }
+
+  if (variant === 'full') {
+    return (
+      <div className={`flex items-center gap-2 ${className}`}>
+        <LogoSVG size={size} withGlow={withGlow} />
+        <span
+          className="font-black tracking-widest"
+          style={{
+            fontSize: size * 0.55,
+            background: 'linear-gradient(135deg, #ffffff 0%, #00F2A6 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
+          PARTTH
+        </span>
+      </div>
+    );
+  }
+
+  return <LogoSVG size={size} withGlow={withGlow} className={className} />;
+}
+
+function LogoSVG({ size = 40, withGlow = false, className = '' }: { size?: number; withGlow?: boolean; className?: string }) {
+  const id = React.useId().replace(/:/g, '');
   return (
     <svg
       width={size}
@@ -15,103 +58,42 @@ export function Logo({ className = '', size = 40 }: LogoProps) {
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      {/* Glow effect */}
       <defs>
-        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+        <filter id={`glow-${id}`} x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="3.5" result="blur1" />
+          <feGaussianBlur stdDeviation="6" result="blur2" />
           <feMerge>
-            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="blur2" />
+            <feMergeNode in="blur1" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
+        {withGlow && (
+          <radialGradient id={`bg-${id}`} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#00F2A6" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+          </radialGradient>
+        )}
       </defs>
 
-      {/* Diamond shape */}
-      <g filter="url(#glow)">
-        {/* Top facet */}
-        <path
-          d="M50 15 L70 35 L50 40 L30 35 Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          fill="none"
-          strokeLinejoin="miter"
-        />
-        
-        {/* Left facet */}
-        <path
-          d="M30 35 L50 40 L50 85 L20 45 Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          fill="none"
-          strokeLinejoin="miter"
-        />
-        
-        {/* Right facet */}
-        <path
-          d="M70 35 L50 40 L50 85 L80 45 Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          fill="none"
-          strokeLinejoin="miter"
-        />
-        
-        {/* Center vertical line */}
-        <line
-          x1="50"
-          y1="40"
-          x2="50"
-          y2="85"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
-        
-        {/* Top left edge */}
-        <line
-          x1="30"
-          y1="35"
-          x2="20"
-          y2="45"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
-        
-        {/* Top right edge */}
-        <line
-          x1="70"
-          y1="35"
-          x2="80"
-          y2="45"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
-        
-        {/* Bottom edges */}
-        <line
-          x1="20"
-          y1="45"
-          x2="50"
-          y2="85"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
-        <line
-          x1="80"
-          y1="45"
-          x2="50"
-          y2="85"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
-        
-        {/* Horizontal top line */}
-        <line
-          x1="30"
-          y1="35"
-          x2="70"
-          y2="35"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
+      {/* Fondo glow opcional */}
+      {withGlow && <circle cx="50" cy="50" r="50" fill={`url(#bg-${id})`} />}
+
+      {/* Diamante rotado 45° con T interior — fiel al logo real */}
+      <g filter={`url(#glow-${id})`} stroke="#00F2A6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        {/* Marco exterior del diamante (cuadrado rotado 45°) */}
+        <polygon points="50,8 92,50 50,92 8,50" fill="none" />
+
+        {/* Línea horizontal superior de la T (de borde izq a borde der, a 1/3 de altura) */}
+        <line x1="8" y1="50" x2="92" y2="50" opacity="0" /> {/* helper invisible */}
+        <line x1="29" y1="29" x2="71" y2="29" />
+
+        {/* Barra vertical de la T (del centro de la línea horiz hasta el vértice inf) */}
+        <line x1="50" y1="29" x2="50" y2="92" />
+
+        {/* Líneas diagonales del girón (facetas internas del diamante) */}
+        <line x1="29" y1="29" x2="8" y2="50" />
+        <line x1="71" y1="29" x2="92" y2="50" />
       </g>
     </svg>
   );

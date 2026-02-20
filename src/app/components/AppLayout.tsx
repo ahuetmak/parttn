@@ -242,8 +242,8 @@ export function AppLayout() {
         {/* Logo & Brand */}
         <div className="h-20 border-b border-[#00F2A6]/10 flex items-center px-6">
           <Link to="/app" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00F2A6] to-[#0EA5E9] flex items-center justify-center shadow-lg shadow-[#00F2A6]/30">
-              <Logo size={24} className="text-black" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center" style={{ background: 'rgba(0,242,166,0.08)', boxShadow: '0 0 20px rgba(0,242,166,0.4), inset 0 1px 0 rgba(255,255,255,0.1)' }}>
+              <img src="/logo-glow.png" alt="PARTTH" width={36} height={36} style={{ objectFit: 'contain' }} />
             </div>
             <div>
               <span className="text-xl font-bold tracking-wider bg-gradient-to-r from-white to-[#00F2A6] bg-clip-text text-transparent block">PARTTH</span>
@@ -375,11 +375,11 @@ export function AppLayout() {
             {/* Same content as desktop sidebar */}
             <div className="h-20 border-b border-[#00F2A6]/10 flex items-center justify-between px-6">
               <Link to="/app" className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00F2A6] to-[#0EA5E9] flex items-center justify-center shadow-lg shadow-[#00F2A6]/30">
-                  <Logo size={24} className="text-black" />
+                <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center" style={{ background: 'rgba(0,242,166,0.08)', boxShadow: '0 0 20px rgba(0,242,166,0.4), inset 0 1px 0 rgba(255,255,255,0.1)' }}>
+                  <img src="/logo-glow.png" alt="PARTTH" width={36} height={36} style={{ objectFit: 'contain' }} />
                 </div>
                 <div>
-                  <span className="text-xl font-bold tracking-wider bg-gradient-to-r from-white to-[#00F2A6] bg-clip-text text-transparent block">PARTH</span>
+                  <span className="text-xl font-bold tracking-wider bg-gradient-to-r from-white to-[#00F2A6] bg-clip-text text-transparent block">PARTTH</span>
                   <span className="text-[#00F2A6] text-xs font-semibold uppercase tracking-widest">{userProfile?.userType === 'marca' || user?.user_metadata?.userType === 'marca' ? 'Marca' : 'Socio'}</span>
                 </div>
               </Link>

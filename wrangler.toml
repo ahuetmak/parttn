@@ -1,14 +1,7 @@
 # Cloudflare Pages — PARTTH
-# Deploy: conecta github.com/ahuetmak/parttn en el Dashboard de Cloudflare Pages
-# Build command: npm install && npm run build
-# Build output: dist
-# Root directory: (vacío)
-
 name = "partth"
 compatibility_date = "2025-01-01"
-
-[env.production]
-name = "partth-prod"
+pages_build_output_dir = "dist"
 
 # Variables de entorno (configurar en Cloudflare Dashboard → Settings → Environment Variables)
 # VITE_SUPABASE_URL         = https://bxcrcumkdzzdfepjetuw.supabase.co

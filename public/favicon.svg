@@ -1,1 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#00F2A6"/><path d="M8 10h6v12H8z M18 10h6l-6 12z" fill="#000"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="18" fill="#000000"/>
+  <defs>
+    <filter id="g" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#g)" stroke="#00F2A6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <polygon points="50,8 92,50 50,92 8,50"/>
+    <line x1="29" y1="29" x2="71" y2="29"/>
+    <line x1="50" y1="29" x2="50" y2="92"/>
+    <line x1="29" y1="29" x2="8" y2="50"/>
+    <line x1="71" y1="29" x2="92" y2="50"/>
+  </g>
+</svg>
