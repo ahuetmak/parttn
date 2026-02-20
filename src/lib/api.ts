@@ -339,6 +339,43 @@ export const growthAPI = {
   },
 };
 
+// ── Social Media API ───────────────────────────────────────────────────────────
+export const socialAPI = {
+  async getStatus() {
+    const response = await fetch(`${API_BASE_URL}/social/status`, {
+      headers: await getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  async broadcast(params: { tipo: 'NUEVA_MISION' | 'DEAL_COMPLETADO'; titulo?: string; presupuesto?: number; comision?: number; ganancia?: number; scoreIA?: number; productoNombre?: string }) {
+    const response = await fetch(`${API_BASE_URL}/social/broadcast`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(params),
+    });
+    return response.json();
+  },
+
+  async postInstagram(caption: string, imageUrl?: string) {
+    const response = await fetch(`${API_BASE_URL}/social/instagram`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ caption, imageUrl }),
+    });
+    return response.json();
+  },
+
+  async configurarSocial(config: { instagram?: { token: string; accountId: string }; twitter?: { apiKey: string; apiSecret: string; accessToken: string; accessSecret: string }; linkedin?: { token: string; personUrn: string } }) {
+    const response = await fetch(`${API_BASE_URL}/admin/social/config`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(config),
+    });
+    return response.json();
+  },
+};
+
 // Notifications API
 export const notificationsAPI = {
   async getNotifications(userId: string) {

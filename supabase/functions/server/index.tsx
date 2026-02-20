@@ -9,6 +9,7 @@ import * as loyalty from "./loyalty.tsx";
 import * as disputes from "./disputes.tsx";
 import * as referrals from "./referrals.tsx";
 import * as n8n from "./n8n.tsx";
+import * as social from "./social.tsx";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const app = new Hono();
@@ -1590,16 +1591,16 @@ app.post("/make-server-1c8a6aaa/admin/seed-marketplace", async (c) => {
       };
       await kv.set(`oferta:${id}`, oferta);
 
-      // Disparar webhook de marketing para viralizar en n8n
+      // Disparar webhook de marketing para n8n
       await n8n.triggerNuevaMisionMarketing({
-        id,
-        titulo: m.titulo,
-        descripcion: m.descripcion,
-        presupuesto: m.presupuesto,
-        comisionSocio: m.comisionSocio,
-        categoria: m.categoria,
-        marcaNombre: m.marcaNombre,
+        id, titulo: m.titulo, descripcion: m.descripcion,
+        presupuesto: m.presupuesto, comisionSocio: m.comisionSocio,
+        categoria: m.categoria, marcaNombre: m.marcaNombre,
       });
+
+      // Broadcast directo a redes sociales (sin n8n)
+      const copy = social.buildMisionCopy({ titulo: m.titulo, presupuesto: m.presupuesto, comision: m.comisionSocio, marcaNombre: m.marcaNombre });
+      social.broadcastPost({ instagram: { caption: copy.instagram }, twitter: copy.twitter, linkedin: copy.linkedin }).catch(console.error);
 
       creadas.push({ id, titulo: m.titulo, presupuesto: m.presupuesto });
     }
@@ -1626,6 +1627,109 @@ app.get("/make-server-1c8a6aaa/admin/fondo-reserva", async (c) => {
     });
   } catch (error) {
     return c.json({ error: 'Error obteniendo fondo' }, 500);
+  }
+});
+
+// ========================================
+// SOCIAL MEDIA — Instagram + X + LinkedIn
+// ========================================
+
+// POST /social/broadcast — Publica en todas las redes configuradas
+app.post("/make-server-1c8a6aaa/social/broadcast", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { tipo, misionId, titulo, presupuesto, comision, ganancia, scoreIA, productoNombre } = body;
+
+    let copy: { instagram: string; twitter: string; linkedin: string };
+
+    if (tipo === 'NUEVA_MISION') {
+      copy = social.buildMisionCopy({ titulo, presupuesto, comision: comision || 85 });
+    } else if (tipo === 'DEAL_COMPLETADO') {
+      copy = social.buildDealCopy({ productoNombre: productoNombre || titulo, ganancia, scoreIA });
+    } else {
+      return c.json({ error: 'tipo debe ser NUEVA_MISION o DEAL_COMPLETADO' }, 400);
+    }
+
+    const results = await social.broadcastPost({
+      instagram: { caption: copy.instagram },
+      twitter: copy.twitter,
+      linkedin: copy.linkedin,
+    });
+
+    const exitosos = results.filter(r => r.ok).length;
+    return c.json({ ok: true, resultados: results, exitosos, total: results.length });
+  } catch (error) {
+    return c.json({ error: String(error) }, 500);
+  }
+});
+
+// POST /social/instagram — Publicar solo en Instagram
+app.post("/make-server-1c8a6aaa/social/instagram", async (c) => {
+  try {
+    const { caption, imageUrl } = await c.req.json();
+    if (!caption) return c.json({ error: 'caption requerido' }, 400);
+    const result = await social.postInstagram({ caption, imageUrl });
+    return c.json(result);
+  } catch (error) {
+    return c.json({ error: String(error) }, 500);
+  }
+});
+
+// POST /social/twitter — Publicar solo en X
+app.post("/make-server-1c8a6aaa/social/twitter", async (c) => {
+  try {
+    const { text } = await c.req.json();
+    if (!text) return c.json({ error: 'text requerido' }, 400);
+    const result = await social.postTwitter(text);
+    return c.json(result);
+  } catch (error) {
+    return c.json({ error: String(error) }, 500);
+  }
+});
+
+// POST /social/linkedin — Publicar solo en LinkedIn
+app.post("/make-server-1c8a6aaa/social/linkedin", async (c) => {
+  try {
+    const { text } = await c.req.json();
+    if (!text) return c.json({ error: 'text requerido' }, 400);
+    const result = await social.postLinkedIn(text);
+    return c.json(result);
+  } catch (error) {
+    return c.json({ error: String(error) }, 500);
+  }
+});
+
+// GET /social/status — Ver qué plataformas están configuradas
+app.get("/make-server-1c8a6aaa/social/status", (c) => {
+  return c.json({
+    instagram: {
+      configurado: !!(Deno.env.get('INSTAGRAM_ACCESS_TOKEN') && Deno.env.get('INSTAGRAM_BUSINESS_ACCOUNT_ID')),
+      vars: ['INSTAGRAM_ACCESS_TOKEN', 'INSTAGRAM_BUSINESS_ACCOUNT_ID'],
+    },
+    twitter: {
+      configurado: !!(Deno.env.get('TWITTER_API_KEY') && Deno.env.get('TWITTER_ACCESS_TOKEN')),
+      vars: ['TWITTER_API_KEY', 'TWITTER_API_SECRET', 'TWITTER_ACCESS_TOKEN', 'TWITTER_ACCESS_SECRET'],
+    },
+    linkedin: {
+      configurado: !!(Deno.env.get('LINKEDIN_ACCESS_TOKEN') && Deno.env.get('LINKEDIN_PERSON_URN')),
+      vars: ['LINKEDIN_ACCESS_TOKEN', 'LINKEDIN_PERSON_URN'],
+    },
+    instrucciones: 'Agrega las vars en Supabase Dashboard → Edge Functions → make-server-1c8a6aaa → Secrets',
+  });
+});
+
+// ── POST /social/config — Guardar tokens de redes sociales ───────────────────
+app.post("/make-server-1c8a6aaa/admin/social/config", async (c) => {
+  try {
+    const body = await c.req.json();
+    // Guardar en KV (no en vars de entorno, que son inmutables en runtime)
+    await kv.set('config:social', {
+      ...body,
+      actualizadoEn: new Date().toISOString(),
+    });
+    return c.json({ ok: true, mensaje: 'Configuración social guardada. Nota: para producción real, agrega las vars en Supabase Secrets.' });
+  } catch (error) {
+    return c.json({ error: String(error) }, 500);
   }
 });
 

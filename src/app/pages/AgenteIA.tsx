@@ -500,25 +500,50 @@ export function AgenteIA() {
                 </motion.div>
               )}
 
-              {/* CTA */}
-              <button
-                onClick={generar}
-                disabled={loading || !form.productoNombre || !form.precioProducto}
-                className="mt-6 w-full py-4 rounded-xl bg-gradient-to-r from-[#00F2A6] to-[#0EA5E9] text-black font-black text-base hover:shadow-[0_0_40px_rgba(0,242,166,0.4)] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-              >
-                {loading ? (
-                  <>
-                    <RefreshCw className="w-5 h-5 animate-spin" />
-                    Abacus Core generando script...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5" />
-                    Generar Script Viral
-                    <ArrowRight className="w-5 h-5" />
-                  </>
+              {/* ── BOTÓN IA POWER ─────────────────────────────────────── */}
+              <div className="mt-6 relative">
+                {/* Glow halo externo */}
+                {!loading && form.productoNombre && form.precioProducto && (
+                  <div className="absolute inset-0 rounded-2xl blur-2xl opacity-60 pointer-events-none"
+                    style={{ background: 'linear-gradient(135deg, #00F2A6 0%, #0EA5E9 100%)' }} />
                 )}
-              </button>
+                <button
+                  onClick={generar}
+                  disabled={loading || !form.productoNombre || !form.precioProducto}
+                  className="relative w-full py-5 rounded-2xl font-black text-lg tracking-wider transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden group"
+                  style={{
+                    background: loading || !form.productoNombre || !form.precioProducto
+                      ? 'rgba(255,255,255,0.05)'
+                      : 'linear-gradient(135deg, #00F2A6 0%, #0EA5E9 50%, #00F2A6 100%)',
+                    backgroundSize: '200% auto',
+                    boxShadow: !loading && form.productoNombre && form.precioProducto
+                      ? '0 0 40px rgba(0,242,166,0.5), 0 0 80px rgba(14,165,233,0.3), inset 0 1px 0 rgba(255,255,255,0.3)'
+                      : 'none',
+                  }}
+                >
+                  {/* Scanline effect */}
+                  <div className="absolute inset-0 opacity-10 pointer-events-none"
+                    style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)' }} />
+
+                  {loading ? (
+                    <span className="relative z-10 flex items-center justify-center gap-3 text-black">
+                      <RefreshCw className="w-6 h-6 animate-spin" />
+                      <span>Abacus Core procesando<span className="animate-pulse">...</span></span>
+                    </span>
+                  ) : (
+                    <span className="relative z-10 flex items-center justify-center gap-3 text-black">
+                      <div className="w-8 h-8 rounded-xl bg-black/20 flex items-center justify-center">
+                        <Zap className="w-5 h-5 text-black" />
+                      </div>
+                      <span className="text-xl">⚡ IA POWER — Generar Script Viral</span>
+                      <ArrowRight className="w-6 h-6" />
+                    </span>
+                  )}
+                </button>
+                <p className="text-center text-zinc-600 text-xs mt-2">
+                  Powered by Abacus Core · Score IA ≥ 90% · Script optimizado para cierre
+                </p>
+              </div>
             </div>
           </motion.div>
         )}

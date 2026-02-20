@@ -164,6 +164,63 @@ export async function handleStripeWebhook(body: string, signature: string) {
   return stripe.webhooks.constructEvent(body, signature, secret);
 }
 
+// ─── 8. SPLIT CALCULATOR — Desglose exacto del dinero ───────────────────────
+// Retorna el desglose de cómo se divide cada pago.
+// Moat Financiero: 15% PARTTH + 2% Fondo Reserva (del 15%) = 13% neto PARTTH + 2% Reserva
+
+export function calcularSplit(amount: number) {
+  const totalCents = Math.round(amount * 100);
+  const feePARTTH_total = Math.round(totalCents * 0.15);    // 15% fee total
+  const fondoReserva = Math.round(feePARTTH_total * (2/15)); // 2% del total (13.33% del fee)
+  const feePARTTH_neto = feePARTTH_total - fondoReserva;     // ~13% neto a PARTTH
+  const gananciaSocio = totalCents - feePARTTH_total;         // 85%
+
+  return {
+    total: amount,
+    totalCents,
+    gananciaSocio: gananciaSocio / 100,
+    gananciaSocioCents: gananciaSocio,
+    feePARTTH: feePARTTH_total / 100,
+    feePARTTH_neto: feePARTTH_neto / 100,
+    fondoReserva: fondoReserva / 100,
+    porcentajes: {
+      socio: '85%',
+      feePARTTH_total: '15%',
+      feePARTTH_neto: '13%',
+      fondoReserva: '2%',
+    },
+  };
+}
+
+// ─── 9. VALIDAR EVIDENCIA IA — Score mínimo 0.90 para liberar fondos ─────────
+// RULE: Si score < 0.90, el pago NO se libera. Período de disputa de 72h.
+
+export function validarScoreIA(score: number): {
+  aprobado: boolean;
+  accion: 'RELEASE' | 'HOLD_EXTENDED' | 'DISPUTE';
+  mensaje: string;
+} {
+  if (score >= 0.90) {
+    return {
+      aprobado: true,
+      accion: 'RELEASE',
+      mensaje: `✅ Score IA ${(score * 100).toFixed(1)}% — Fondos liberados automáticamente`,
+    };
+  } else if (score >= 0.70) {
+    return {
+      aprobado: false,
+      accion: 'HOLD_EXTENDED',
+      mensaje: `⚠️ Score IA ${(score * 100).toFixed(1)}% — Hold extendido 72h. Sube evidencia adicional.`,
+    };
+  } else {
+    return {
+      aprobado: false,
+      accion: 'DISPUTE',
+      mensaje: `❌ Score IA ${(score * 100).toFixed(1)}% — Disputa iniciada. Revisión manual en 72h.`,
+    };
+  }
+}
+
 // ─── Alias legacy (compatibilidad) ───────────────────────────────────────────
 
 export async function createPayout(amount: number, userId: string, connectedAccountId: string) {
