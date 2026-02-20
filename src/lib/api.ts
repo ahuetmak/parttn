@@ -217,6 +217,16 @@ export const marketplaceAPI = {
     if (!response.ok) throw new Error('Error rechazando aplicación');
     return response.json();
   },
+
+  async seedMisiones() {
+    const response = await fetch(`${API_BASE_URL}/admin/seed-marketplace`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(await getAuthHeaders()) },
+      body: '{}',
+    });
+    if (!response.ok) throw new Error('Error sembrando marketplace');
+    return response.json();
+  },
 };
 
 // User API
@@ -226,6 +236,37 @@ export const userAPI = {
       headers: await getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Error obteniendo perfil');
+    return response.json();
+  },
+};
+
+// Agente IA — Abacus Core API
+export const agenteAPI = {
+  async generarScript(data: {
+    marcaId?: string;
+    productoNombre: string;
+    productoDescripcion: string;
+    precioProducto: number;
+    audienciaObjetivo: string;
+    categoriaProducto: string;
+    uspList: string[];
+    comisionSocio: number;
+    marcaNombre: string;
+  }) {
+    const response = await fetch(`${API_BASE_URL}/agente/generar-script`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Error generando script');
+    return response.json();
+  },
+
+  async getHistorial(marcaId: string) {
+    const response = await fetch(`${API_BASE_URL}/agente/historial/${marcaId}`, {
+      headers: await getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Error obteniendo historial');
     return response.json();
   },
 };
@@ -264,6 +305,36 @@ export const reviewsAPI = {
       headers: await getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Error obteniendo pendientes');
+    return response.json();
+  },
+};
+
+// ── n8n / Growth API ───────────────────────────────────────────────────────────
+export const growthAPI = {
+  async configurarN8n(url: string) {
+    const response = await fetch(`${API_BASE_URL}/admin/n8n/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(await getAuthHeaders()) },
+      body: JSON.stringify({ url }),
+    });
+    if (!response.ok) throw new Error('Error configurando n8n');
+    return response.json();
+  },
+
+  async getEngagement(socioId: string) {
+    const response = await fetch(`${API_BASE_URL}/engagement/${socioId}`, {
+      headers: await getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Error obteniendo engagement');
+    return response.json();
+  },
+
+  async flushWebhookQueue() {
+    const response = await fetch(`${API_BASE_URL}/admin/n8n/flush-queue`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Error procesando cola de webhooks');
     return response.json();
   },
 };

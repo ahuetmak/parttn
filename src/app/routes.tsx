@@ -27,6 +27,7 @@ import { CrearOferta } from "./pages/CrearOferta";
 import { Aplicaciones } from "./pages/Aplicaciones";
 import { Notificaciones } from "./pages/Notificaciones";
 import { Reviews } from "./pages/Reviews";
+import { AgenteIA } from "./pages/AgenteIA";
 import { NotFound } from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -160,6 +161,10 @@ export const router = createBrowserRouter([
       {
         path: "reviews",
         Component: Reviews,
+      },
+      {
+        path: "agente-ia",
+        Component: AgenteIA,
       },
       {
         path: "*",

@@ -582,11 +582,10 @@ export function Wallet() {
                       <p className={`text-lg font-black mb-1 ${isPositive ? 'text-green-400' : 'text-yellow-400'}`}>
                         {isPositive ? '+' : ''}{tx.amount.toLocaleString('es-ES')} 💎
                       </p>
-                      <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${
-                        tx.status === 'locked' ? 'bg-[#0EA5E9]/10 text-[#0EA5E9] border-[#0EA5E9]/25' :
-                        tx.status === 'completed' ? 'bg-green-500/10 text-green-400 border-green-500/25' :
-                        'bg-yellow-500/10 text-yellow-400 border-yellow-500/25'
-                      }`}>
+                      <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${tx.status === 'locked' ? 'bg-[#0EA5E9]/10 text-[#0EA5E9] border-[#0EA5E9]/25' :
+                          tx.status === 'completed' ? 'bg-green-500/10 text-green-400 border-green-500/25' :
+                            'bg-yellow-500/10 text-yellow-400 border-yellow-500/25'
+                        }`}>
                         {tx.status === 'locked' ? 'Bloqueado' :
                           tx.status === 'completed' ? 'Completado' :
                             tx.status === 'processing' ? 'Procesando' : tx.status}

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { Diamond, Shield, Clock, TrendingUp, Award, Filter, Search, Users, Building2, CheckCircle, Zap, ArrowRight, AlertCircle } from 'lucide-react';
+import { Diamond, Shield, Clock, TrendingUp, Award, Filter, Search, Users, Building2, CheckCircle, Zap, ArrowRight, AlertCircle, Cpu, Star, Lock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { projectId, publicAnonKey } from '/utils/supabase/info';
 import { useAuth } from '../context/AuthContext';
+import { marketplaceAPI } from '../../lib/api';
 
 export function Marketplace() {
   const navigate = useNavigate();
@@ -28,18 +29,35 @@ export function Marketplace() {
       setError(null);
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-1c8a6aaa/ofertas`,
-        {
-          headers: {
-            Authorization: `Bearer ${publicAnonKey}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${publicAnonKey}` } }
       );
 
-      if (!response.ok) {
-        throw new Error('Error al cargar ofertas');
-      }
+      if (!response.ok) throw new Error('Error al cargar ofertas');
 
       const data = await response.json();
+
+      // Auto-seed las 3 misiones de alto valor si el marketplace está vacío
+      if (!data || data.length === 0) {
+        try {
+          const seedRes = await fetch(
+            `https://${projectId}.supabase.co/functions/v1/make-server-1c8a6aaa/admin/seed-marketplace`,
+            { method: 'POST', headers: { Authorization: `Bearer ${publicAnonKey}`, 'Content-Type': 'application/json' }, body: '{}' }
+          );
+          if (seedRes.ok) {
+            // Recargar después del seed
+            const reloadRes = await fetch(
+              `https://${projectId}.supabase.co/functions/v1/make-server-1c8a6aaa/ofertas`,
+              { headers: { Authorization: `Bearer ${publicAnonKey}` } }
+            );
+            if (reloadRes.ok) {
+              const reloadData = await reloadRes.json();
+              setOfertas(reloadData);
+              return;
+            }
+          }
+        } catch { /* si falla el seed, continuar con lista vacía */ }
+      }
+
       setOfertas(data);
     } catch (err: any) {
       console.error('Error loading ofertas:', err);
@@ -86,20 +104,35 @@ export function Marketplace() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-start justify-between gap-4 mb-2 flex-wrap">
           <div>
-            <h1 className="text-5xl font-bold text-white mb-3 tracking-tight">Marketplace</h1>
-            <p className="text-zinc-400 text-lg">Oportunidades protegidas con escrow · Evidencia obligatoria · Reputación verificable</p>
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-4xl font-black text-white tracking-tight">Marketplace</h1>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#00F2A6]/10 border border-[#00F2A6]/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00F2A6] animate-pulse" />
+                <span className="text-[#00F2A6] text-xs font-black">LIVE</span>
+              </div>
+            </div>
+            <p className="text-zinc-500 text-sm">Escrow automático · Evidencia obligatoria · IA Auditor Score ≥ 90%</p>
           </div>
-          {(userProfile?.userType === 'marca' || user?.user_metadata?.userType === 'marca') && (
-            <button
-              onClick={() => navigate('/app/crear-oferta')}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#00F2A6] to-[#0EA5E9] text-black font-bold hover:shadow-lg hover:shadow-[#00F2A6]/50 transition-all flex items-center gap-2"
+          <div className="flex items-center gap-3 flex-wrap">
+            <Link
+              to="/app/agente-ia"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#00F2A6]/30 bg-[#00F2A6]/5 text-[#00F2A6] font-bold text-sm hover:bg-[#00F2A6]/10 transition-all"
             >
-              <Zap className="w-5 h-5" />
-              Crear Oferta
-            </button>
-          )}
+              <Cpu className="w-4 h-4" />
+              Agente IA
+            </Link>
+            {(userProfile?.userType === 'marca' || user?.user_metadata?.userType === 'marca') && (
+              <button
+                onClick={() => navigate('/app/crear-oferta')}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#00F2A6] to-[#0EA5E9] text-black font-black hover:shadow-lg hover:shadow-[#00F2A6]/40 transition-all flex items-center gap-2 text-sm"
+              >
+                <Zap className="w-4 h-4" />
+                Publicar Misión
+              </button>
+            )}
+          </div>
         </div>
       </motion.div>
 
@@ -313,92 +346,125 @@ export function Marketplace() {
 
           {/* Ofertas Grid */}
           {!loading && !error && filteredOfertas.length > 0 && (
-            <div className="grid md:grid-cols-2 gap-6">
-              {filteredOfertas.map((oferta, index) => (
-                <motion.div
-                  key={oferta.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="relative group"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#00F2A6]/10 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100" />
-                  <div className="relative bg-gradient-to-br from-zinc-900/80 to-black border border-zinc-800 rounded-2xl p-6 hover:border-[#00F2A6]/40 transition-all">
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex flex-wrap items-center gap-2 mb-3">
-                          <span className="px-3 py-1 rounded-xl bg-gradient-to-r from-[#00F2A6]/20 to-[#0EA5E9]/20 border border-[#00F2A6]/30 text-[#00F2A6] text-xs font-bold">
-                            🔒 ESCROW
-                          </span>
-                          <span className="px-3 py-1 rounded-xl bg-[#8B5CF6]/10 border border-[#8B5CF6]/30 text-[#8B5CF6] text-xs font-bold">
-                            {oferta.categoria}
-                          </span>
-                        </div>
-                        <h3 className="text-xl font-bold text-white mb-2 leading-tight">{oferta.titulo}</h3>
-                        <p className="text-zinc-400 text-sm leading-relaxed line-clamp-2">{oferta.descripcion}</p>
-                      </div>
-                    </div>
+            <div className="grid md:grid-cols-2 gap-5">
+              {filteredOfertas.map((oferta, index) => {
+                const ganancia = Math.round((oferta.presupuesto || 0) * ((oferta.comisionSocio || 25) / 100));
+                const nivelColor: Record<string, string> = { ELITE: '#F59E0B', PREMIUM: '#8B5CF6', ALTO_VALOR: '#0EA5E9', default: '#00F2A6' };
+                const nivel = oferta.nivel || 'default';
+                const nColor = nivelColor[nivel] || nivelColor.default;
 
-                    {/* Marca Info */}
-                    <div className="bg-black/60 rounded-xl p-4 mb-4 border border-zinc-800">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-zinc-500 text-xs font-bold uppercase tracking-wider mb-1">Marca</p>
-                          <p className="text-white font-bold">{oferta.marcaNombre || 'Marca Verificada'}</p>
+                return (
+                  <motion.div
+                    key={oferta.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.08 }}
+                    className="relative group"
+                  >
+                    <div className="absolute inset-0 rounded-2xl blur-2xl group-hover:blur-3xl transition-all opacity-0 group-hover:opacity-100"
+                      style={{ background: `radial-gradient(circle at 50% 0%, ${nColor}15, transparent 70%)` }} />
+
+                    <div className="relative bg-zinc-900/50 backdrop-blur-xl border border-zinc-800/60 rounded-2xl p-6 hover:border-zinc-700 transition-all overflow-hidden">
+                      {/* Glow corner */}
+                      <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20"
+                        style={{ background: nColor }} />
+
+                      {/* Badges */}
+                      <div className="flex flex-wrap items-center gap-2 mb-3 relative z-10">
+                        <span className="px-2.5 py-1 rounded-lg bg-[#00F2A6]/10 border border-[#00F2A6]/25 text-[#00F2A6] text-xs font-black">
+                          🔒 ESCROW
+                        </span>
+                        <span className="px-2.5 py-1 rounded-lg text-xs font-black border"
+                          style={{ background: `${nColor}10`, borderColor: `${nColor}25`, color: nColor }}>
+                          {nivel === 'ELITE' ? '👑 ELITE' : nivel === 'PREMIUM' ? '⚡ PREMIUM' : nivel === 'ALTO_VALOR' ? '🔥 ALTO VALOR' : oferta.categoria}
+                        </span>
+                        {oferta.badge === 'VERIFICADO' || oferta.marcaNombre?.includes('PARTTH') ? (
+                          <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-zinc-300 text-xs font-black flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-[#00F2A6]" /> PARTTH ORIGINAL
+                          </span>
+                        ) : null}
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-lg font-black text-white mb-2 leading-tight relative z-10">{oferta.titulo}</h3>
+                      <p className="text-zinc-500 text-sm leading-relaxed line-clamp-2 mb-4 relative z-10">{oferta.descripcion}</p>
+
+                      {/* Split visual */}
+                      <div className="mb-4 relative z-10">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-zinc-600 text-xs font-bold">Split del pago</span>
+                          <span className="text-zinc-600 text-xs">${(oferta.presupuesto || 0).toLocaleString()} total</span>
                         </div>
-                        {oferta.marcaReputacion && (
-                          <div className="text-right">
-                            <p className="text-zinc-500 text-xs font-bold uppercase tracking-wider mb-1">Reputación</p>
-                            <div className="flex items-center gap-2">
-                              <Award className="w-4 h-4 text-green-500" />
-                              <span className="text-green-500 font-bold">{oferta.marcaReputacion}%</span>
-                            </div>
+                        <div className="flex h-1.5 rounded-full overflow-hidden gap-px">
+                          <div className="bg-gradient-to-r from-[#00F2A6] to-[#0EA5E9] rounded-l-full"
+                            style={{ width: `${oferta.comisionSocio || 25}%` }} />
+                          <div className="bg-zinc-700 rounded-r-full flex-1" />
+                        </div>
+                        <div className="flex items-center justify-between mt-1.5">
+                          <span className="text-[#00F2A6] text-xs font-bold">{oferta.comisionSocio || 25}% Socio</span>
+                          <span className="text-zinc-600 text-xs">15% PARTTH · 2% Reserva</span>
+                        </div>
+                      </div>
+
+                      {/* Pago principal */}
+                      <div className="flex items-center justify-between mb-4 p-3 rounded-xl bg-black/50 border border-zinc-800/60 relative z-10">
+                        <div>
+                          <p className="text-zinc-500 text-xs font-bold uppercase tracking-wider mb-0.5">Tu comisión</p>
+                          <div className="flex items-center gap-2">
+                            <Diamond className="w-4 h-4 fill-current" style={{ color: nColor }} />
+                            <span className="text-2xl font-black text-white">{ganancia.toLocaleString()}</span>
+                            <span className="text-zinc-500 text-sm">💎</span>
                           </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Meta Info */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <Diamond className="w-6 h-6 text-[#00F2A6] fill-current" />
-                        <span className="text-white font-bold text-2xl">{oferta.presupuesto?.toLocaleString('es-ES') || 0}</span>
-                        <span className="text-zinc-500">💎</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-zinc-400">
-                        <Users className="w-4 h-4" />
-                        <span className="text-sm">{oferta.aplicaciones || 0} aplicaciones</span>
-                      </div>
-                    </div>
-
-                    {/* Comisión */}
-                    <div className="mb-4 p-3 bg-[#0EA5E9]/10 border border-[#0EA5E9]/20 rounded-xl">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-[#0EA5E9] text-xs font-bold uppercase tracking-wider mb-1">Tu ganancia (Socio)</p>
-                          <p className="text-white font-bold text-lg">{oferta.comisionSocio || 25}%</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-zinc-500 text-xs mb-1">Neto para ti</p>
-                          <p className="text-[#00F2A6] font-bold text-lg">
-                            {Math.round((oferta.presupuesto || 0) * ((oferta.comisionSocio || 25) / 100)).toLocaleString('es-ES')} 💎
-                          </p>
+                          <p className="text-zinc-500 text-xs mb-0.5">Aplicaciones</p>
+                          <div className="flex items-center gap-1.5 justify-end">
+                            <Users className="w-3.5 h-3.5 text-zinc-500" />
+                            <span className="text-white font-bold">{oferta.aplicaciones || 0}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* CTA */}
-                    <button
-                      onClick={() => handleAplicar(oferta.id)}
-                      className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-[#00F2A6] to-[#0EA5E9] text-black font-bold hover:shadow-lg hover:shadow-[#00F2A6]/50 transition-all flex items-center justify-center gap-2 group"
-                    >
-                      Ver Oferta Completa
-                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
+                      {/* Requisitos preview */}
+                      {oferta.requisitos?.length > 0 && (
+                        <div className="mb-4 relative z-10">
+                          <p className="text-zinc-600 text-xs font-bold uppercase tracking-wider mb-2">Checklist IA ({oferta.requisitos.length} ítems)</p>
+                          <div className="space-y-1">
+                            {oferta.requisitos.slice(0, 2).map((req: string, i: number) => (
+                              <div key={i} className="flex items-center gap-2 text-xs text-zinc-500">
+                                <div className="w-1 h-1 rounded-full bg-[#00F2A6]" />
+                                {req}
+                              </div>
+                            ))}
+                            {oferta.requisitos.length > 2 && (
+                              <div className="text-xs text-zinc-600">+{oferta.requisitos.length - 2} más...</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* CTA */}
+                      <div className="grid grid-cols-2 gap-2 relative z-10">
+                        <Link
+                          to={`/app/agente-ia?mision=${encodeURIComponent(oferta.titulo)}&precio=${oferta.presupuesto}&comision=${oferta.comisionSocio || 25}`}
+                          className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-zinc-700 text-zinc-400 font-bold text-xs hover:border-[#00F2A6]/30 hover:text-[#00F2A6] transition-all"
+                        >
+                          <Cpu className="w-3.5 h-3.5" />
+                          Generar Script
+                        </Link>
+                        <button
+                          onClick={() => handleAplicar(oferta.id)}
+                          className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-black text-xs text-black hover:shadow-lg transition-all"
+                          style={{ background: `linear-gradient(135deg, ${nColor}, #0EA5E9)` }}
+                        >
+                          Aplicar Ahora
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </>

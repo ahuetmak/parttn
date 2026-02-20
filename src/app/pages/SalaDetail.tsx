@@ -329,19 +329,33 @@ export function SalaDetail() {
         <span className="text-white font-semibold">War Room #{sala.id.slice(0, 8)}</span>
       </div>
 
-      {/* ── Header ────────────────────────────────────────────────────── */}
+      {/* ── Header Glassmorphism ───────────────────────────────────────── */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <div className="relative overflow-hidden rounded-3xl border border-[#00F2A6]/20 bg-gradient-to-br from-zinc-900/80 to-black p-8">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#00F2A6]/5 via-transparent to-[#0EA5E9]/5" />
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#00F2A6]/5 rounded-full blur-3xl" />
+        <div className="relative overflow-hidden rounded-3xl border border-[#00F2A6]/25 bg-zinc-900/40 backdrop-blur-2xl p-8"
+          style={{ boxShadow: '0 0 60px rgba(0,242,166,0.05), inset 0 1px 0 rgba(255,255,255,0.05)' }}>
+
+          {/* Glassmorphism layers */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#00F2A6]/6 via-transparent to-[#0EA5E9]/6 rounded-3xl" />
+          <div className="absolute top-0 right-0 w-80 h-80 bg-[#00F2A6]/8 rounded-full blur-[80px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-60 h-60 bg-[#0EA5E9]/6 rounded-full blur-[60px] pointer-events-none" />
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=60 height=60 viewBox=0 0 60 60 xmlns=http://www.w3.org/2000/svg%3E%3Cg fill=none fill-rule=evenodd%3E%3Cg fill=%2300F2A6 fill-opacity=0.015%3E%3Cpath d=M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30" />
+
+          {/* PARTTH — Logo de autoridad */}
+          <div className="absolute top-6 right-8 flex items-center gap-2 opacity-60">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#00F2A6] to-[#0EA5E9] flex items-center justify-center">
+              <Diamond className="w-3.5 h-3.5 text-black fill-current" />
+            </div>
+            <span className="text-white font-black text-xs tracking-widest">PARTTH</span>
+          </div>
 
           <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00F2A6]/20 to-[#0EA5E9]/20 border border-[#00F2A6]/30 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00F2A6]/20 to-[#0EA5E9]/20 border border-[#00F2A6]/30 flex items-center justify-center"
+                style={{ boxShadow: '0 0 25px rgba(0,242,166,0.2)' }}>
                 <Shield className="w-8 h-8 text-[#00F2A6]" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white mb-1">{sala.titulo}</h1>
+                <h1 className="text-3xl font-black text-white mb-1">{sala.titulo}</h1>
                 <p className="text-zinc-400 text-sm">{sala.descripcion}</p>
                 <p className="text-zinc-600 text-xs mt-1">
                   Creada {new Date(sala.createdAt).toLocaleDateString('es-ES', { dateStyle: 'long' })}
@@ -350,13 +364,13 @@ export function SalaDetail() {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Estado badge */}
               <div
-                className="flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-bold"
+                className="flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-black backdrop-blur-xl"
                 style={{
-                  backgroundColor: `${currentEstado.color}15`,
-                  borderColor: `${currentEstado.color}40`,
+                  backgroundColor: `${currentEstado.color}12`,
+                  borderColor: `${currentEstado.color}35`,
                   color: currentEstado.color,
+                  boxShadow: `0 0 20px ${currentEstado.color}10`,
                 }}
               >
                 <span className="relative flex h-2 w-2">
@@ -371,37 +385,39 @@ export function SalaDetail() {
               </div>
 
               <button onClick={loadSala}
-                className="p-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-all">
+                className="p-2 rounded-xl border border-zinc-700/50 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all backdrop-blur-xl">
                 <RefreshCw className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          {/* Participantes + Diamantes */}
+          {/* Participantes + Diamantes — glassmorphism cards */}
           <div className="relative grid md:grid-cols-3 gap-4 mt-8">
-            <div className="bg-black/40 rounded-2xl p-5 border border-[#00F2A6]/10">
+            <div className="bg-black/30 backdrop-blur-xl rounded-2xl p-5 border border-white/6 hover:border-[#00F2A6]/20 transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <Building2 className="w-4 h-4 text-[#00F2A6]" />
-                <span className="text-zinc-500 text-xs font-bold uppercase tracking-wider">Marca</span>
-                {isMarca && <span className="text-[#00F2A6] text-xs font-bold">(Tú)</span>}
+                <span className="text-zinc-500 text-xs font-black uppercase tracking-wider">Marca</span>
+                {isMarca && <span className="text-[#00F2A6] text-xs font-black">(Tú)</span>}
               </div>
               <p className="text-white font-mono text-sm">{sala.marcaId.slice(0, 16)}…</p>
             </div>
 
-            <div className="bg-gradient-to-br from-[#00F2A6]/10 to-[#0EA5E9]/10 rounded-2xl p-5 border border-[#00F2A6]/30 text-center">
-              <div className="flex items-center justify-center gap-3 mb-1">
+            <div className="relative bg-gradient-to-br from-[#00F2A6]/12 to-[#0EA5E9]/12 backdrop-blur-xl rounded-2xl p-5 border border-[#00F2A6]/25 text-center overflow-hidden"
+              style={{ boxShadow: '0 0 40px rgba(0,242,166,0.1)' }}>
+              <div className="absolute inset-0 bg-gradient-to-b from-white/3 to-transparent" />
+              <div className="relative flex items-center justify-center gap-3 mb-1">
                 <Diamond className="w-6 h-6 text-[#00F2A6] fill-current" />
-                <p className="text-4xl font-bold text-white">{sala.totalProducto.toLocaleString('es-ES')}</p>
+                <p className="text-4xl font-black text-white">{sala.totalProducto.toLocaleString('es-ES')}</p>
               </div>
-              <p className="text-[#00F2A6] text-sm font-bold">💎 en Escrow</p>
-              <p className="text-zinc-500 text-xs mt-1">${sala.totalProducto.toLocaleString('es-ES')} USD</p>
+              <p className="text-[#00F2A6] text-sm font-black relative">💎 en Escrow</p>
+              <p className="text-zinc-500 text-xs mt-1 relative">${sala.totalProducto.toLocaleString('es-ES')} USD</p>
             </div>
 
-            <div className="bg-black/40 rounded-2xl p-5 border border-[#0EA5E9]/10">
+            <div className="bg-black/30 backdrop-blur-xl rounded-2xl p-5 border border-white/6 hover:border-[#0EA5E9]/20 transition-all">
               <div className="flex items-center gap-2 mb-2">
                 <Users className="w-4 h-4 text-[#0EA5E9]" />
-                <span className="text-zinc-500 text-xs font-bold uppercase tracking-wider">Socio</span>
-                {isSocio && <span className="text-[#0EA5E9] text-xs font-bold">(Tú)</span>}
+                <span className="text-zinc-500 text-xs font-black uppercase tracking-wider">Socio</span>
+                {isSocio && <span className="text-[#0EA5E9] text-xs font-black">(Tú)</span>}
               </div>
               <p className="text-white font-mono text-sm">{sala.socioId.slice(0, 16)}…</p>
             </div>
