@@ -28,6 +28,47 @@ app.use(
   }),
 );
 
+// ── JWT AUTH GUARD ────────────────────────────────────────────────────────────
+// Verifica el Bearer token de Supabase en rutas financieras críticas.
+// Rutas excluidas: health, auth/signup, auth/login (no requieren sesión previa).
+const UNPROTECTED = [
+  '/health',
+  '/auth/signup',
+  '/auth/login',
+];
+
+app.use('/make-server-1c8a6aaa/*', async (c, next) => {
+  const path = c.req.path.replace('/make-server-1c8a6aaa', '');
+
+  // Pasar rutas no protegidas sin validar
+  if (UNPROTECTED.some(u => path.startsWith(u))) {
+    return next();
+  }
+
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return c.json({ error: 'No autorizado — token requerido', code: 'AUTH_REQUIRED' }, 401);
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    );
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) {
+      return c.json({ error: 'Token inválido o expirado', code: 'AUTH_INVALID' }, 401);
+    }
+    // Inyectar userId verificado en el contexto
+    c.set('userId' as never, user.id);
+    return next();
+  } catch {
+    return c.json({ error: 'Error de autenticación', code: 'AUTH_ERROR' }, 401);
+  }
+});
+// ─────────────────────────────────────────────────────────────────────────────
+
 // Initialize Supabase Storage bucket on startup
 const initStorageBucket = async () => {
   try {
