@@ -300,11 +300,10 @@ export function AgenteIA() {
                 className="flex items-center gap-2"
               >
                 <div
-                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black border-2 transition-all ${
-                    paso === n ? 'border-[#00F2A6] bg-[#00F2A6] text-black' :
-                    paso > n ? 'border-[#00F2A6] bg-[#00F2A6]/20 text-[#00F2A6]' :
-                    'border-zinc-700 bg-zinc-800 text-zinc-500'
-                  }`}
+                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black border-2 transition-all ${paso === n ? 'border-[#00F2A6] bg-[#00F2A6] text-black' :
+                      paso > n ? 'border-[#00F2A6] bg-[#00F2A6]/20 text-[#00F2A6]' :
+                        'border-zinc-700 bg-zinc-800 text-zinc-500'
+                    }`}
                 >
                   {paso > n ? <Check className="w-3.5 h-3.5" /> : n}
                 </div>
@@ -434,11 +433,10 @@ export function AgenteIA() {
                       <button
                         key={cat.id}
                         onClick={() => handleChange('categoriaProducto', cat.id)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                          form.categoriaProducto === cat.id
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${form.categoriaProducto === cat.id
                             ? 'border-[#00F2A6] bg-[#00F2A6]/15 text-[#00F2A6]'
                             : 'border-zinc-800 text-zinc-500 hover:border-zinc-600'
-                        }`}
+                          }`}
                       >
                         {cat.emoji} {cat.label}
                       </button>
@@ -586,11 +584,10 @@ export function AgenteIA() {
                 <button
                   key={v}
                   onClick={() => setActiveScript(v)}
-                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider border transition-all ${
-                    activeScript === v
+                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider border transition-all ${activeScript === v
                       ? 'border-[#00F2A6] bg-[#00F2A6]/15 text-[#00F2A6]'
                       : 'border-zinc-800 text-zinc-500 hover:border-zinc-600'
-                  }`}
+                    }`}
                 >
                   {v === 'secciones' ? '📋 Por Secciones' : '📜 Guión Completo'}
                 </button>

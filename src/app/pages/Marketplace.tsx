@@ -214,11 +214,10 @@ export function Marketplace() {
       <div className="flex items-center gap-4 border-b border-zinc-800">
         <button
           onClick={() => setActiveTab('ofertas')}
-          className={`px-6 py-3 font-bold transition-all border-b-2 relative ${
-            activeTab === 'ofertas'
+          className={`px-6 py-3 font-bold transition-all border-b-2 relative ${activeTab === 'ofertas'
               ? 'border-[#00F2A6] text-[#00F2A6]'
               : 'border-transparent text-zinc-500 hover:text-white'
-          }`}
+            }`}
         >
           {activeTab === 'ofertas' && (
             <motion.div
@@ -234,11 +233,10 @@ export function Marketplace() {
         </button>
         <button
           onClick={() => setActiveTab('socios')}
-          className={`px-6 py-3 font-bold transition-all border-b-2 relative ${
-            activeTab === 'socios'
+          className={`px-6 py-3 font-bold transition-all border-b-2 relative ${activeTab === 'socios'
               ? 'border-[#00F2A6] text-[#00F2A6]'
               : 'border-transparent text-zinc-500 hover:text-white'
-          }`}
+            }`}
         >
           {activeTab === 'socios' && (
             <motion.div

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router';
-import { 
-  ShoppingBag, 
-  Briefcase, 
-  Wallet, 
-  Award, 
-  Settings, 
+import {
+  ShoppingBag,
+  Briefcase,
+  Wallet,
+  Award,
+  Settings,
   Search,
   Bell,
   Diamond,
@@ -56,12 +56,12 @@ export function AppLayout() {
       navigator.vibrate([200, 100, 200]); // pattern: vibrate-pause-vibrate
     }
 
-    const iconColor = notification.type === 'aplicacion' ? '#00F2A6' 
-      : notification.type === 'disputa' ? '#EF4444' 
-      : '#0EA5E9';
+    const iconColor = notification.type === 'aplicacion' ? '#00F2A6'
+      : notification.type === 'disputa' ? '#EF4444'
+        : '#0EA5E9';
 
     toast.custom((t) => (
-      <div 
+      <div
         className="w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl"
         style={{
           background: 'linear-gradient(135deg, #0A0E1A 0%, #000000 100%)',
@@ -72,7 +72,7 @@ export function AppLayout() {
         <div className="p-4">
           <div className="flex items-start gap-3">
             {/* Abacus bot icon */}
-            <div 
+            <div
               className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{
                 background: `linear-gradient(135deg, ${iconColor}, #0EA5E9)`,
@@ -119,8 +119,8 @@ export function AppLayout() {
             <button
               onClick={() => {
                 toast.dismiss(t);
-                window.dispatchEvent(new CustomEvent('open-abacus', { 
-                  detail: { message: `${notification.title}: ${notification.message}` } 
+                window.dispatchEvent(new CustomEvent('open-abacus', {
+                  detail: { message: `${notification.title}: ${notification.message}` }
                 }));
               }}
               className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs font-bold hover:border-[#00F2A6]/30 hover:text-[#00F2A6] transition-all flex items-center gap-1.5"
@@ -151,12 +151,12 @@ export function AppLayout() {
       loadNotifications();
       // Poll with adaptive interval
       const pollInterval = getPollingInterval();
-      
+
       // Log interval change in dev mode for debugging
       if (process.env.NODE_ENV === 'development') {
         console.log(`🔄 Polling interval: ${pollInterval / 1000}s (${location.pathname})`);
       }
-      
+
       const interval = setInterval(() => {
         loadWallet();
         loadNotifications();
@@ -227,8 +227,8 @@ export function AppLayout() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   // Extract salaId if on a sala page
-  const salaId = location.pathname.includes('/sala/') 
-    ? location.pathname.split('/sala/')[1] 
+  const salaId = location.pathname.includes('/sala/')
+    ? location.pathname.split('/sala/')[1]
     : undefined;
 
   return (
@@ -251,21 +251,20 @@ export function AppLayout() {
             </div>
           </Link>
         </div>
-        
+
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname.startsWith(item.path);
-            
+
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group relative overflow-hidden ${
-                  isActive
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group relative overflow-hidden ${isActive
                     ? 'bg-gradient-to-r from-[#00F2A6]/20 to-[#0EA5E9]/20 text-[#00F2A6] border border-[#00F2A6]/30 shadow-[0_0_20px_rgba(0,242,166,0.2)]'
                     : 'text-zinc-400 hover:bg-[#00F2A6]/5 hover:text-white hover:border-[#00F2A6]/10 border border-transparent'
-                }`}
+                  }`}
               >
                 {isActive && (
                   <div className="absolute inset-0 bg-gradient-to-r from-[#00F2A6]/10 to-transparent animate-pulse" />
@@ -285,7 +284,7 @@ export function AppLayout() {
               </Link>
             );
           })}
-          
+
           {/* CTA Button */}
           {(userProfile?.userType === 'marca' || user?.user_metadata?.userType === 'marca') ? (
             <button
@@ -305,13 +304,13 @@ export function AppLayout() {
             </button>
           )}
         </nav>
-        
+
         <div className="p-6 border-t border-[#00F2A6]/10 space-y-4">
           {/* Wallet Card */}
           <div className="relative overflow-hidden rounded-2xl border border-[#00F2A6]/30 p-4 group cursor-pointer" onClick={() => navigate('/app/wallet')}>
             <div className="absolute inset-0 bg-gradient-to-br from-[#00F2A6]/10 via-[#0EA5E9]/5 to-transparent" />
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#00F2A6]/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500" />
-            
+
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00F2A6] to-[#0EA5E9] flex items-center justify-center shadow-lg shadow-[#00F2A6]/30">
@@ -328,7 +327,7 @@ export function AppLayout() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2 pt-3 border-t border-[#00F2A6]/20">
                 <div>
                   <p className="text-xs text-zinc-500">Escrow</p>
@@ -345,10 +344,10 @@ export function AppLayout() {
               </div>
             </div>
           </div>
-          
+
           {/* User Profile */}
-          <Link 
-            to="/app/settings" 
+          <Link
+            to="/app/settings"
             className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-900/50 border border-zinc-800 hover:border-[#00F2A6]/30 transition-all group"
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00F2A6] to-[#0EA5E9] flex items-center justify-center text-lg font-bold text-black shadow-lg shadow-[#00F2A6]/20">
@@ -366,7 +365,7 @@ export function AppLayout() {
       {/* Mobile Sidebar */}
       {isSidebarOpen && (
         <>
-          <div 
+          <div
             className="fixed inset-0 bg-black/80 z-40 lg:hidden backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
@@ -388,22 +387,21 @@ export function AppLayout() {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname.startsWith(item.path);
-                
+
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                      isActive
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
                         ? 'bg-gradient-to-r from-[#00F2A6]/20 to-[#0EA5E9]/20 text-[#00F2A6] border border-[#00F2A6]/30 shadow-[0_0_20px_rgba(0,242,166,0.2)]'
                         : 'text-zinc-400 hover:bg-[#00F2A6]/5 hover:text-white'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-5 h-5" />
                     <span className="font-semibold">{item.label}</span>
@@ -416,7 +414,7 @@ export function AppLayout() {
                 );
               })}
             </nav>
-            
+
             <div className="p-6 border-t border-[#00F2A6]/10 space-y-4">
               <div className="relative overflow-hidden rounded-2xl border border-[#00F2A6]/30 p-4" onClick={() => { navigate('/app/wallet'); setSidebarOpen(false); }}>
                 <div className="absolute inset-0 bg-gradient-to-br from-[#00F2A6]/10 via-[#0EA5E9]/5 to-transparent" />
@@ -443,11 +441,11 @@ export function AppLayout() {
           <button onClick={() => setSidebarOpen(true)}>
             <Menu className="w-6 h-6 text-white" />
           </button>
-          
+
           <Link to="/app" className="text-xl font-bold tracking-wider bg-gradient-to-r from-white to-[#00F2A6] bg-clip-text text-transparent">
             PARTH
           </Link>
-          
+
           <button onClick={() => navigate('/app/notificaciones')} className="relative">
             <Bell className="w-5 h-5 text-zinc-400" />
             {unreadCount > 0 && (
@@ -464,15 +462,15 @@ export function AppLayout() {
         <div className="flex items-center justify-between px-8 h-16">
           <div className="flex items-center gap-2 bg-zinc-900/50 px-4 py-2.5 rounded-xl border border-zinc-800 w-96 focus-within:border-[#00F2A6]/30 transition-colors">
             <Search className="w-4 h-4 text-zinc-500" />
-            <input 
-              type="text" 
-              placeholder="Buscar ofertas, socios, salas..." 
+            <input
+              type="text"
+              placeholder="Buscar ofertas, socios, salas..."
               className="bg-transparent border-none outline-none text-sm w-full text-white placeholder:text-zinc-600"
             />
           </div>
-          
+
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={() => navigate('/app/notificaciones')}
               className="relative p-2.5 hover:bg-[#00F2A6]/10 rounded-xl transition-colors group"
             >
@@ -483,8 +481,8 @@ export function AppLayout() {
                 </span>
               )}
             </button>
-            
-            <button 
+
+            <button
               onClick={() => navigate('/app/settings')}
               className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00F2A6] to-[#0EA5E9] flex items-center justify-center shadow-lg shadow-[#00F2A6]/30 hover:shadow-[#00F2A6]/50 transition-all text-lg font-bold text-black"
             >
