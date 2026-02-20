@@ -390,44 +390,252 @@ app.get("/make-server-1c8a6aaa/sala/:salaId", async (c) => {
   }
 });
 
-// Entregar evidencia
+// ========================================
+// MOTOR DE VALIDACIÓN IA — AUDITOR DE VERDAD
+// ========================================
+
+/**
+ * Calcula un score de confianza 0.0–1.0 sobre la evidencia enviada.
+ * Criterios: cantidad de archivos, diversidad de tipos, calidad de notas.
+ * Un score ≥ 0.90 autoriza el release automático de fondos.
+ */
+function calcularScoreIA(archivos: any[], notas: string): {
+  score: number;
+  breakdown: Record<string, number>;
+  veredicto: string;
+} {
+  let score = 0;
+  const breakdown: Record<string, number> = {};
+
+  // 1. Cantidad de archivos (max 0.30)
+  const cantArchivos = archivos.length;
+  const scoreArchivos = Math.min(cantArchivos / 5, 1) * 0.30;
+  breakdown.archivos = parseFloat(scoreArchivos.toFixed(3));
+  score += scoreArchivos;
+
+  // 2. Diversidad de tipos de archivo (max 0.25)
+  const extensiones = new Set(
+    archivos.map(a => {
+      const parts = (a.name || '').split('.');
+      return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : 'unknown';
+    })
+  );
+  const tiposImagen = ['jpg','jpeg','png','gif','webp','heic','svg'];
+  const tiposVideo = ['mp4','mov','avi','webm','mkv'];
+  const tiposDoc = ['pdf','doc','docx','xls','xlsx','csv','txt'];
+
+  let diversidad = 0;
+  if ([...extensiones].some(e => tiposImagen.includes(e))) diversidad += 0.40;
+  if ([...extensiones].some(e => tiposVideo.includes(e))) diversidad += 0.40;
+  if ([...extensiones].some(e => tiposDoc.includes(e))) diversidad += 0.20;
+  const scoreDiversidad = Math.min(diversidad, 1) * 0.25;
+  breakdown.diversidad = parseFloat(scoreDiversidad.toFixed(3));
+  score += scoreDiversidad;
+
+  // 3. Calidad de notas (max 0.25)
+  const palabras = notas.trim().split(/\s+/).filter(Boolean).length;
+  const tieneLinks = /https?:\/\//.test(notas);
+  const tieneNumeros = /\d/.test(notas);
+  let scoreNotas = Math.min(palabras / 80, 1) * 0.15;
+  if (tieneLinks) scoreNotas += 0.06;
+  if (tieneNumeros) scoreNotas += 0.04;
+  scoreNotas = Math.min(scoreNotas, 0.25);
+  breakdown.notas = parseFloat(scoreNotas.toFixed(3));
+  score += scoreNotas;
+
+  // 4. Presencia de screenshots/pantallazos (max 0.20)
+  const nombresConScreenshot = archivos.filter(a => {
+    const nombre = (a.name || '').toLowerCase();
+    return nombre.includes('screen') || nombre.includes('captura') ||
+           nombre.includes('screenshot') || nombre.includes('evidencia') ||
+           nombre.includes('resultado') || nombre.includes('venta') ||
+           nombre.includes('sale') || nombre.includes('comprobante');
+  });
+  const scoreScreenshots = Math.min(nombresConScreenshot.length / 3, 1) * 0.20;
+  breakdown.capturas = parseFloat(scoreScreenshots.toFixed(3));
+  score += scoreScreenshots;
+
+  const scoreFinal = parseFloat(Math.min(score, 1).toFixed(3));
+
+  let veredicto: string;
+  if (scoreFinal >= 0.90) veredicto = 'APROBADO';
+  else if (scoreFinal >= 0.70) veredicto = 'REVISION_MANUAL';
+  else veredicto = 'RECHAZADO';
+
+  return { score: scoreFinal, breakdown, veredicto };
+}
+
+// Entregar evidencia + disparo automático de validación IA
 app.post("/make-server-1c8a6aaa/sala/:salaId/evidencia", async (c) => {
   try {
     const salaId = c.req.param("salaId");
     const { socioId, notas, archivos } = await c.req.json();
     
     const sala = await kv.get(`sala:${salaId}`);
-    if (!sala) {
-      return c.json({ error: 'Sala no encontrada' }, 404);
-    }
+    if (!sala) return c.json({ error: 'Sala no encontrada' }, 404);
+    if (sala.socioId !== socioId) return c.json({ error: 'Solo el socio puede entregar evidencia' }, 403);
+    if (sala.evidenciaEntregada) return c.json({ error: 'Ya existe evidencia entregada en esta sala' }, 409);
     
-    if (sala.socioId !== socioId) {
-      return c.json({ error: 'Solo el socio puede entregar evidencia' }, 403);
-    }
+    // Correr validación IA
+    const iaResult = calcularScoreIA(archivos, notas);
     
-    // Actualizar sala con evidencia
     sala.evidenciaEntregada = true;
     sala.evidencia = {
       notas,
       archivos,
       fechaEntrega: new Date().toISOString(),
     };
-    
-    // Agregar al timeline
+    sala.iaScore = iaResult.score;
+    sala.iaBreakdown = iaResult.breakdown;
+    sala.iaVeredicto = iaResult.veredicto;
+    sala.iaValidadoEn = new Date().toISOString();
+    sala.estado = 'en_revision';
+
     sala.timeline.push({
       id: crypto.randomUUID(),
       tipo: 'evidencia_entregada',
-      descripcion: 'Evidencia entregada para revisión',
+      descripcion: `Evidencia entregada — ${archivos.length} archivo(s) · Notas: ${notas.length > 0 ? 'Sí' : 'No'}`,
       timestamp: new Date().toISOString(),
       autor: socioId,
     });
-    
+
+    sala.timeline.push({
+      id: crypto.randomUUID(),
+      tipo: 'ia_validacion',
+      descripcion: `Auditor IA: Score ${(iaResult.score * 100).toFixed(1)}% — ${iaResult.veredicto}`,
+      timestamp: new Date().toISOString(),
+      autor: 'AUDITOR_IA',
+      score: iaResult.score,
+    });
+
+    // Auto-release si score ≥ 0.90
+    if (iaResult.veredicto === 'APROBADO') {
+      sala.evidenciaAprobada = true;
+      sala.aprobadoPor = 'AUDITOR_IA';
+      sala.estado = 'completada';
+      sala.fondosLiberados = true;
+
+      const marcaWallet = await kv.get(`wallet:${sala.marcaId}`);
+      const socioWallet = await kv.get(`wallet:${sala.socioId}`);
+      let platformWallet = await kv.get('wallet:platform') || {
+        id: 'platform', totalRecaudado: 0, totalTransacciones: 0
+      };
+
+      // Split automático: 85% Socio | 15% PARTTH
+      marcaWallet.enEscrow -= sala.totalProducto;
+      marcaWallet.disponible += sala.netoMarca;
+      marcaWallet.totalTarifasPagadas += sala.feePARTTH;
+
+      socioWallet.disponible += sala.gananciaSocio;
+      socioWallet.totalIngresos += sala.gananciaSocio;
+
+      platformWallet.totalRecaudado += sala.feePARTTH;
+      platformWallet.totalTransacciones += 1;
+
+      await kv.set(`wallet:${sala.marcaId}`, marcaWallet);
+      await kv.set(`wallet:${sala.socioId}`, socioWallet);
+      await kv.set('wallet:platform', platformWallet);
+
+      sala.timeline.push({
+        id: crypto.randomUUID(),
+        tipo: 'fondos_liberados',
+        descripcion: `Fondos liberados automáticamente · Socio: +${sala.gananciaSocio} 💎 · PARTTH: ${sala.feePARTTH} 💎`,
+        timestamp: new Date().toISOString(),
+        autor: 'AUDITOR_IA',
+      });
+
+      // Registrar transacciones
+      await kv.set(`transaction:${sala.socioId}:${crypto.randomUUID()}`, {
+        id: crypto.randomUUID(), userId: sala.socioId,
+        type: 'released', amount: sala.gananciaSocio,
+        salaId, status: 'completed', aprobadoPor: 'AUDITOR_IA',
+        timestamp: new Date().toISOString(),
+      });
+      await kv.set(`transaction:${sala.marcaId}:${crypto.randomUUID()}`, {
+        id: crypto.randomUUID(), userId: sala.marcaId,
+        type: 'escrow_released', amount: sala.netoMarca,
+        fee: sala.feePARTTH, salaId, status: 'completed',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     await kv.set(`sala:${salaId}`, sala);
-    
-    return c.json(sala);
+    return c.json({
+      sala,
+      iaResult,
+      autoAprobado: iaResult.veredicto === 'APROBADO',
+    });
   } catch (error) {
     console.error(`Error entregando evidencia: ${error}`);
     return c.json({ error: 'Error entregando evidencia' }, 500);
+  }
+});
+
+// Re-validar evidencia con IA (solo marca puede solicitarlo)
+app.post("/make-server-1c8a6aaa/sala/:salaId/validar-ia", async (c) => {
+  try {
+    const salaId = c.req.param("salaId");
+    const { marcaId } = await c.req.json();
+    
+    const sala = await kv.get(`sala:${salaId}`);
+    if (!sala) return c.json({ error: 'Sala no encontrada' }, 404);
+    if (!sala.evidenciaEntregada) return c.json({ error: 'No hay evidencia para validar' }, 400);
+    if (sala.fondosLiberados) return c.json({ error: 'Los fondos ya fueron liberados' }, 409);
+
+    const iaResult = calcularScoreIA(sala.evidencia.archivos, sala.evidencia.notas);
+    
+    sala.iaScore = iaResult.score;
+    sala.iaBreakdown = iaResult.breakdown;
+    sala.iaVeredicto = iaResult.veredicto;
+    sala.iaValidadoEn = new Date().toISOString();
+
+    sala.timeline.push({
+      id: crypto.randomUUID(),
+      tipo: 'ia_validacion',
+      descripcion: `Re-validación IA: Score ${(iaResult.score * 100).toFixed(1)}% — ${iaResult.veredicto}`,
+      timestamp: new Date().toISOString(),
+      autor: 'AUDITOR_IA',
+      score: iaResult.score,
+    });
+
+    if (iaResult.veredicto === 'APROBADO') {
+      sala.evidenciaAprobada = true;
+      sala.aprobadoPor = 'AUDITOR_IA';
+      sala.estado = 'completada';
+      sala.fondosLiberados = true;
+
+      const marcaWallet = await kv.get(`wallet:${sala.marcaId}`);
+      const socioWallet = await kv.get(`wallet:${sala.socioId}`);
+      let platformWallet = await kv.get('wallet:platform') || {
+        id: 'platform', totalRecaudado: 0, totalTransacciones: 0
+      };
+
+      marcaWallet.enEscrow -= sala.totalProducto;
+      marcaWallet.disponible += sala.netoMarca;
+      marcaWallet.totalTarifasPagadas += sala.feePARTTH;
+      socioWallet.disponible += sala.gananciaSocio;
+      socioWallet.totalIngresos += sala.gananciaSocio;
+      platformWallet.totalRecaudado += sala.feePARTTH;
+      platformWallet.totalTransacciones += 1;
+
+      await kv.set(`wallet:${sala.marcaId}`, marcaWallet);
+      await kv.set(`wallet:${sala.socioId}`, socioWallet);
+      await kv.set('wallet:platform', platformWallet);
+
+      sala.timeline.push({
+        id: crypto.randomUUID(),
+        tipo: 'fondos_liberados',
+        descripcion: `Fondos liberados · Socio: +${sala.gananciaSocio} 💎 · PARTTH fee: ${sala.feePARTTH} 💎`,
+        timestamp: new Date().toISOString(),
+        autor: 'AUDITOR_IA',
+      });
+    }
+
+    await kv.set(`sala:${salaId}`, sala);
+    return c.json({ sala, iaResult, autoAprobado: iaResult.veredicto === 'APROBADO' });
+  } catch (error) {
+    console.error(`Error validando con IA: ${error}`);
+    return c.json({ error: 'Error en validación IA' }, 500);
   }
 });
 
@@ -500,10 +708,14 @@ app.post("/make-server-1c8a6aaa/sala/:salaId/aprobar", async (c) => {
     } else {
       // Liberar inmediatamente (servicios)
       sala.fondosLiberados = true;
+      sala.aprobadoPor = sala.aprobadoPor || marcaId;
       
       // Mover fondos
       const marcaWallet = await kv.get(`wallet:${marcaId}`);
       const socioWallet = await kv.get(`wallet:${sala.socioId}`);
+      let platformWallet = await kv.get('wallet:platform') || {
+        id: 'platform', totalRecaudado: 0, totalTransacciones: 0
+      };
       
       marcaWallet.enEscrow -= sala.totalProducto;
       marcaWallet.disponible += sala.netoMarca;
@@ -511,9 +723,14 @@ app.post("/make-server-1c8a6aaa/sala/:salaId/aprobar", async (c) => {
       
       socioWallet.disponible += sala.gananciaSocio;
       socioWallet.totalIngresos += sala.gananciaSocio;
+
+      // Fee 15% → PARTTH platform wallet
+      platformWallet.totalRecaudado += sala.feePARTTH;
+      platformWallet.totalTransacciones += 1;
       
       await kv.set(`wallet:${marcaId}`, marcaWallet);
       await kv.set(`wallet:${sala.socioId}`, socioWallet);
+      await kv.set('wallet:platform', platformWallet);
       
       // Registrar transacciones
       const socioTransaction = {

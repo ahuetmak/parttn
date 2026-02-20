@@ -116,6 +116,16 @@ export const salasAPI = {
     if (!response.ok) throw new Error('Error abriendo disputa');
     return response.json();
   },
+
+  async validarEvidenciaIA(salaId: string, marcaId: string) {
+    const response = await fetch(`${API_BASE_URL}/sala/${salaId}/validar-ia`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ marcaId }),
+    });
+    if (!response.ok) throw new Error('Error en validación IA');
+    return response.json();
+  },
 };
 
 // Marketplace API
