@@ -31,12 +31,12 @@ const stripePromise = STRIPE_KEY ? loadStripe(STRIPE_KEY) : null;
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
 const PRESETS = [
-  { amount: 100,   label: '100',   badge: '' },
-  { amount: 500,   label: '500',   badge: 'Popular' },
-  { amount: 1000,  label: '1,000', badge: '' },
-  { amount: 2500,  label: '2,500', badge: 'Pro' },
-  { amount: 5000,  label: '5,000', badge: '' },
-  { amount: 10000, label: '10,000',badge: 'Elite' },
+  { amount: 100, label: '100', badge: '' },
+  { amount: 500, label: '500', badge: 'Popular' },
+  { amount: 1000, label: '1,000', badge: '' },
+  { amount: 2500, label: '2,500', badge: 'Pro' },
+  { amount: 5000, label: '5,000', badge: '' },
+  { amount: 10000, label: '10,000', badge: 'Elite' },
 ];
 
 const STRIPE_APPEARANCE = {
@@ -311,16 +311,14 @@ export function RecargarModal({ isOpen, onClose, onSuccess }: Props) {
                       <button
                         key={a}
                         onClick={() => { setAmount(a); setCustomAmount(''); }}
-                        className={`relative py-3 px-2 rounded-xl font-bold text-sm transition-all ${
-                          amount === a && !customAmount
+                        className={`relative py-3 px-2 rounded-xl font-bold text-sm transition-all ${amount === a && !customAmount
                             ? 'bg-gradient-to-br from-[#00F2A6] to-[#0EA5E9] text-black shadow-lg shadow-[#00F2A6]/20'
                             : 'bg-black/40 text-white border border-zinc-800 hover:border-[#00F2A6]/30'
-                        }`}
+                          }`}
                       >
                         {badge && (
-                          <span className={`absolute -top-2 left-1/2 -translate-x-1/2 text-xs px-2 py-0.5 rounded-full font-bold ${
-                            amount === a && !customAmount ? 'bg-black/30 text-black' : 'bg-[#00F2A6]/20 text-[#00F2A6]'
-                          }`}>{badge}</span>
+                          <span className={`absolute -top-2 left-1/2 -translate-x-1/2 text-xs px-2 py-0.5 rounded-full font-bold ${amount === a && !customAmount ? 'bg-black/30 text-black' : 'bg-[#00F2A6]/20 text-[#00F2A6]'
+                            }`}>{badge}</span>
                         )}
                         {label} 💎
                       </button>
