@@ -1,0 +1,11 @@
+{
+  "name": "PARTH - Marketplace Protegido",
+  "short_name": "PARTH",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#00F2A6",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

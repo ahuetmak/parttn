@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://partth.com/sitemap.xml
