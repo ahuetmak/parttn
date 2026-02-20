@@ -150,15 +150,28 @@ Total de la transacción
 ### Inmediato (esta sesión)
 - [x] ~~Verificar deploy de Edge Functions en Supabase~~ → ✅ `{"status":"ok"}` confirmado
 - [x] ~~Crear CHANGELOG.md~~ → ✅ Libro de ruta iniciado
-- [x] ~~Wallet con saldo visual en Dashboard~~ → ✅ `Wallet.tsx` completo (26KB)
+- [x] ~~Wallet con saldo visual en Dashboard~~ → ✅ `Wallet.tsx` completo
 - [x] ~~Instalar Git y hacer primer commit~~ → ✅ `1910d2a`
 - [x] ~~Sala Digital con flujo de evidencia completo~~ → ✅ War Room + Auditor IA completo
 - [x] ~~Stripe Escrow Engine~~ → ✅ `createEscrowHold` + split 85/15 + `wallet:platform`
 - [x] ~~RecargarModal~~ → ✅ Stripe Elements real + fallback demo mode
-- [x] ~~Cloudflare Pages config~~ → ✅ `wrangler.toml` + `_redirects` configurado
-- [ ] **⚡ PENDIENTE: Agregar tu Stripe key** → `.env.local`: `VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...`
-- [ ] **⚡ PENDIENTE: Conectar repo en Cloudflare Pages** → dashboard.cloudflare.com → Pages
-- [ ] **⚡ PENDIENTE: Instalar dependencias** → abrir terminal y ejecutar `npm install`
+- [x] ~~Cloudflare Pages config~~ → ✅ `wrangler.toml` + `_redirects` + GitHub Actions CI/CD
+- [x] ~~Instalar dependencias~~ → ✅ `npm install` exitoso — 2,098 módulos compilados
+- [x] ~~Build de producción~~ → ✅ `dist/` generado — `e6fe993` pusheado a GitHub
+- [ ] **🔑 FIRMA REQUERIDA: 4 secrets en GitHub** → ver instrucciones abajo
+
+### 🔑 INSTRUCCIONES DE DEPLOY (CEO firma aquí)
+Para activar el deploy automático a partth.com, agrega estos 4 secrets en:
+**https://github.com/ahuetmak/parttn/settings/secrets/actions**
+
+| Secret | Valor |
+|--------|-------|
+| `CLOUDFLARE_API_TOKEN` | Token de tu Cloudflare Dashboard → API Tokens → Create Token → "Edit Cloudflare Workers" template |
+| `CLOUDFLARE_ACCOUNT_ID` | Tu Account ID en dashboard.cloudflare.com (barra lateral derecha) |
+| `VITE_SUPABASE_URL` | `https://bxcrcumkdzzdfepjetuw.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` (ver .env.local) |
+
+Una vez agregados, cada push a `main` despliega automáticamente a partth.com.
 
 ### Sprint 2
 - [ ] Integrar módulo de evidencia con validación IA (Abacus)
