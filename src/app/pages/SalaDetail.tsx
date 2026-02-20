@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import { salasAPI } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 import { AcuerdoOperativo } from '../components/AcuerdoOperativo';
+import { EvidenciaModule } from '../components/EvidenciaModule';
 import { toast } from 'sonner';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -609,133 +610,29 @@ export function SalaDetail() {
 
               {/* Upload (solo Socio, si no hay evidencia aún) */}
               {isSocio && !sala.evidenciaEntregada && (
-                <div className="bg-gradient-to-br from-zinc-900/60 to-black border border-zinc-800 rounded-2xl p-6 space-y-5">
-                  <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                <div className="bg-gradient-to-br from-zinc-900/60 to-black border border-zinc-800 rounded-2xl p-6">
+                  <h3 className="text-white font-bold text-lg flex items-center gap-2 mb-5">
                     <Upload className="w-5 h-5 text-[#00F2A6]" />
                     Subir Evidencia
                   </h3>
-
-                  {/* Drag & Drop */}
-                  <div
-                    onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-                    onDragLeave={() => setDragOver(false)}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${
-                      dragOver
-                        ? 'border-[#00F2A6] bg-[#00F2A6]/5 scale-[1.01]'
-                        : 'border-zinc-700 hover:border-[#00F2A6]/50 hover:bg-[#00F2A6]/3'
-                    }`}
-                  >
-                    <Upload className={`w-10 h-10 mx-auto mb-3 transition-colors ${dragOver ? 'text-[#00F2A6]' : 'text-zinc-500'}`} />
-                    <p className="text-white font-semibold mb-1">
-                      {dragOver ? 'Suelta aquí' : 'Arrastra o haz clic para seleccionar'}
-                    </p>
-                    <p className="text-zinc-500 text-sm">
-                      Imágenes, videos, PDFs, documentos · Más archivos = mayor score IA
-                    </p>
-                    <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" />
-                  </div>
-
-                  {/* Lista de archivos seleccionados */}
-                  <AnimatePresence>
-                    {archivos.length > 0 && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }} className="space-y-2">
-                        <p className="text-zinc-400 text-xs font-bold uppercase tracking-wider">
-                          {archivos.length} archivo(s) seleccionado(s)
-                        </p>
-                        {archivos.map((file, idx) => (
-                          <motion.div key={idx}
-                            initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                            className="flex items-center gap-3 p-3 bg-black/40 rounded-xl border border-zinc-800">
-                            {getFileIcon(file.name)}
-                            <span className="flex-1 text-white text-sm truncate">{file.name}</span>
-                            <span className="text-zinc-500 text-xs">{(file.size / 1024).toFixed(0)} KB</span>
-                            <button onClick={e => { e.stopPropagation(); removeFile(idx); }}
-                              className="text-zinc-600 hover:text-red-400 transition-colors">
-                              <X className="w-4 h-4" />
-                            </button>
-                          </motion.div>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  {/* Notas */}
-                  <div>
-                    <label className="block text-white font-semibold text-sm mb-2">
-                      Descripción de evidencia
-                      <span className="text-zinc-500 font-normal ml-1">(más detalle = mayor score IA)</span>
-                    </label>
-                    <textarea
-                      value={notas}
-                      onChange={e => setNotas(e.target.value)}
-                      className="w-full bg-black/40 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm placeholder:text-zinc-600 focus:outline-none focus:border-[#00F2A6] transition-colors min-h-[120px] resize-none"
-                      placeholder="Describe en detalle qué evidencia estás entregando. Incluye links, números, métricas y resultados concretos..."
-                    />
-                    <div className="flex justify-between mt-1">
-                      <p className="text-zinc-600 text-xs">
-                        {notas.split(/\s+/).filter(Boolean).length} palabras
-                      </p>
-                      <p className="text-zinc-600 text-xs">
-                        Recomendado: 80+ palabras con links y números
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Score Preview */}
-                  {(archivos.length > 0 || notas.length > 20) && (
-                    <div className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl">
-                      <p className="text-zinc-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <Sparkles className="w-3 h-3 text-[#8B5CF6]" />
-                        Estimación de Score IA
-                      </p>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                          {(() => {
-                            const filesScore = Math.min(archivos.length / 5, 1) * 30;
-                            const notasScore = Math.min(notas.split(/\s+/).filter(Boolean).length / 80, 1) * 15;
-                            const est = Math.min(filesScore + notasScore + (archivos.length > 0 ? 20 : 0), 100);
-                            const estColor = est >= 90 ? '#00F2A6' : est >= 70 ? '#F59E0B' : '#EF4444';
-                            return (
-                              <motion.div
-                                className="h-full rounded-full"
-                                style={{ backgroundColor: estColor, width: `${est}%` }}
-                                animate={{ width: `${est}%` }}
-                                transition={{ duration: 0.5 }}
-                              />
-                            );
-                          })()}
-                        </div>
-                        <span className="text-zinc-400 text-xs font-bold">
-                          ~{(() => {
-                            const filesScore = Math.min(archivos.length / 5, 1) * 30;
-                            const notasScore = Math.min(notas.split(/\s+/).filter(Boolean).length / 80, 1) * 15;
-                            return Math.min(Math.round(filesScore + notasScore + (archivos.length > 0 ? 20 : 0)), 100);
-                          })()}%
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={handleUploadEvidencia}
-                    disabled={uploading || archivos.length === 0}
-                    className="w-full py-4 rounded-xl bg-gradient-to-r from-[#00F2A6] to-[#0EA5E9] text-black font-bold text-sm hover:shadow-lg hover:shadow-[#00F2A6]/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {uploading ? (
-                      <>
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        Enviando al Auditor IA...
-                      </>
-                    ) : (
-                      <>
-                        <Brain className="w-4 h-4" />
-                        Enviar Evidencia · Validar con IA
-                      </>
-                    )}
-                  </button>
+                  <EvidenciaModule
+                    salaId={sala.id}
+                    socioId={user!.id}
+                    totalProducto={sala.totalProducto}
+                    feePARTTH={sala.feePARTTH}
+                    gananciaSocio={sala.gananciaSocio}
+                    onEvidenciaEnviada={({ sala: updatedSala, iaResult, autoAprobado }) => {
+                      setSala(updatedSala);
+                      setShowIAPanel(true);
+                      setIaAnimating(true);
+                      if (autoAprobado) {
+                        toast.success(`¡Score ${(iaResult.score * 100).toFixed(1)}% — Fondos liberados automáticamente!`);
+                      } else {
+                        toast.warning(`Score IA: ${(iaResult.score * 100).toFixed(1)}% — ${iaResult.veredicto === 'REVISION_MANUAL' ? 'Requiere aprobación manual' : 'Evidencia insuficiente'}`);
+                      }
+                      setTimeout(() => setIaAnimating(false), 1600);
+                    }}
+                  />
                 </div>
               )}
 
