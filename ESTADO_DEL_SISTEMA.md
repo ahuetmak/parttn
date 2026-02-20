@@ -65,21 +65,15 @@ Split: 85% Socio | 15% PARTTH
 
 | Elemento | Estado | Acción Requerida |
 |---|---|---|
-| Git instalado | ❌ **NO EN PATH** | Instalar Git para Windows |
-| `.gitignore` | ✅ **CREADO** | Protege `.env*`, `node_modules`, `dist` |
+| Git (Portable) | ✅ **v2.53.0** | `C:\Users\ahuet\OneDrive\news\PortableGit` |
+| `.gitignore` | ✅ **ACTIVO** | Protege `.env*`, `node_modules`, `dist` |
 | `CHANGELOG.md` | ✅ **CREADO** | Libro de cambios iniciado (2026-02-19) |
-| Estado del repo | ⏸️ **PENDIENTE** | Requiere `git init` manual post-instalación |
+| Primer commit | ✅ **`1910d2a`** | 124 archivos · 20,659 líneas |
+| Repositorio remoto | ✅ **EN GITHUB** | `github.com/ahuetmak/parttn` · branch `main` |
+| Estado del repo | ✅ **SINCRONIZADO** | `main` tracking `origin/main` |
 
-**Acción requerida por el usuario:**
-```bash
-# 1. Descargar e instalar Git: https://git-scm.com/download/win
-# 2. Abrir nueva terminal y ejecutar:
-git init
-git add .
-git commit -m "feat: PARTTH — fundación del sistema de confianza v0.1.0"
-git remote add origin <URL_DEL_REPO_EN_GITHUB>
-git push -u origin main
-```
+**Repositorio:** `https://github.com/ahuetmak/parttn`  
+**Commit fundacional:** `1910d2a — feat: PARTTH — fundacion del sistema de confianza v0.1.0`
 
 ---
 
@@ -157,9 +151,14 @@ Total de la transacción
 - [x] ~~Verificar deploy de Edge Functions en Supabase~~ → ✅ `{"status":"ok"}` confirmado
 - [x] ~~Crear CHANGELOG.md~~ → ✅ Libro de ruta iniciado
 - [x] ~~Wallet con saldo visual en Dashboard~~ → ✅ `Wallet.tsx` completo (26KB)
-- [ ] **Instalar Git** y hacer primer commit → https://git-scm.com/download/win
-- [ ] **Agregar STRIPE keys** a `.env.local` → `VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...`
-- [ ] Activar Sala Digital con flujo de evidencia completo (War Room)
+- [x] ~~Instalar Git y hacer primer commit~~ → ✅ `1910d2a`
+- [x] ~~Sala Digital con flujo de evidencia completo~~ → ✅ War Room + Auditor IA completo
+- [x] ~~Stripe Escrow Engine~~ → ✅ `createEscrowHold` + split 85/15 + `wallet:platform`
+- [x] ~~RecargarModal~~ → ✅ Stripe Elements real + fallback demo mode
+- [x] ~~Cloudflare Pages config~~ → ✅ `wrangler.toml` + `_redirects` configurado
+- [ ] **⚡ PENDIENTE: Agregar tu Stripe key** → `.env.local`: `VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...`
+- [ ] **⚡ PENDIENTE: Conectar repo en Cloudflare Pages** → dashboard.cloudflare.com → Pages
+- [ ] **⚡ PENDIENTE: Instalar dependencias** → abrir terminal y ejecutar `npm install`
 
 ### Sprint 2
 - [ ] Integrar módulo de evidencia con validación IA (Abacus)
