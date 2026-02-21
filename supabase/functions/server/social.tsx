@@ -22,6 +22,43 @@ interface PostResult {
   url?: string;
 }
 
+// ── FACEBOOK PAGE POSTING ────────────────────────────────────────────────────
+
+export async function postFacebookPage(message: string): Promise<PostResult> {
+  // Lee de env var O del KV store (configurado via /admin/social/config)
+  let token = Deno.env.get('FACEBOOK_PAGE_ACCESS_TOKEN');
+  let pageId = Deno.env.get('FACEBOOK_PAGE_ID');
+
+  // Fallback: leer del KV store
+  if (!token || !pageId) {
+    try {
+      const { default: kv } = await import('./kv_store.tsx');
+      const config: any = await kv.get('config:social');
+      if (config?.facebookPageToken) token = config.facebookPageToken;
+      if (config?.facebookPageId) pageId = config.facebookPageId;
+    } catch { /* no-op */ }
+  }
+
+  if (!token || !pageId) {
+    return { platform: 'facebook', ok: false, error: 'Facebook Page token no configurado.' };
+  }
+
+  try {
+    const res = await fetch(`https://graph.facebook.com/v21.0/${pageId}/feed`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, access_token: token }),
+    });
+    const data = await res.json();
+    if (data.id) {
+      return { platform: 'facebook', ok: true, id: data.id, url: `https://facebook.com/${data.id}` };
+    }
+    return { platform: 'facebook', ok: false, error: JSON.stringify(data) };
+  } catch (err) {
+    return { platform: 'facebook', ok: false, error: String(err) };
+  }
+}
+
 // ── INSTAGRAM ────────────────────────────────────────────────────────────────
 
 export async function postInstagram(params: {
@@ -205,9 +242,11 @@ export async function broadcastPost(params: {
   instagram?: { caption: string; imageUrl?: string };
   twitter?: string;
   linkedin?: string;
+  facebook?: string;
 }): Promise<PostResult[]> {
   const tasks: Promise<PostResult>[] = [];
 
+  if (params.facebook) tasks.push(postFacebookPage(params.facebook));
   if (params.instagram) tasks.push(postInstagram(params.instagram));
   if (params.twitter) tasks.push(postTwitter(params.twitter));
   if (params.linkedin) tasks.push(postLinkedIn(params.linkedin));
@@ -225,11 +264,13 @@ export function buildMisionCopy(mision: {
   marcaNombre?: string;
 }) {
   const ganancia = Math.round(mision.presupuesto * mision.comision / 100);
+  const base = `💎 NUEVA MISIÓN: "${mision.titulo}"\n\n💰 Presupuesto: $${mision.presupuesto.toLocaleString()} USD\n✅ Tu comisión: $${ganancia.toLocaleString()} (${mision.comision}%)\n🔒 Escrow automático — fondos protegidos\n🤖 Validación IA score > 90%\n\n👉 partth.com/app/marketplace`;
 
   return {
-    instagram: `💎 NUEVA MISIÓN PARTTH\n\n"${mision.titulo}"\n\n💰 Presupuesto: $${mision.presupuesto.toLocaleString()} USD\n✅ Tu comisión: $${ganancia.toLocaleString()} (${mision.comision}%)\n🔒 Fondos en escrow — sin riesgo\n🤖 Validación IA obligatoria\n\n🔗 partth.com/app/marketplace\n\n#partth #marketplace #digitalmarketing #comisiones #dinerodigital #emprendimiento`,
-    twitter: `🚨 Nueva misión en #PARTTH: "${mision.titulo}"\n\n💰 $${mision.presupuesto.toLocaleString()} USD bloqueados en escrow\n✅ Tu ganancia: $${ganancia.toLocaleString()} (${mision.comision}%)\n🤖 Score IA > 0.90 para cobrar\n\npartth.com/app/marketplace #escrow #ventas`,
-    linkedin: `🚀 Nueva oportunidad en PARTTH — Infraestructura de Ventas y Confianza\n\n📋 Misión: "${mision.titulo}"\n💵 Presupuesto: $${mision.presupuesto.toLocaleString()} USD\n💰 Comisión: $${ganancia.toLocaleString()} (${mision.comision}%)\n\nSistema único: fondos bloqueados en escrow hasta validación por IA.\nSin riesgo de impago. Evidencia multimedia verificada.\n\n👉 partth.com/app/marketplace\n\n#partth #marketplace #ventas #emprendimiento #fintech`,
+    facebook: `${base}\n\n#PARTTH #Marketplace #Comisiones #DineroDigital #Emprendimiento`,
+    instagram: `${base}\n\n#partth #marketplace #digitalmarketing #comisiones #dinerodigital #emprendimiento`,
+    twitter: `🚨 Nueva misión en #PARTTH: "${mision.titulo}"\n💰 $${mision.presupuesto.toLocaleString()} en escrow · Tu ganancia: $${ganancia.toLocaleString()}\n🤖 Score IA > 0.90\npartth.com/app/marketplace`,
+    linkedin: `🚀 Nueva oportunidad en PARTTH\n\nMisión: "${mision.titulo}"\nPresupuesto: $${mision.presupuesto.toLocaleString()} USD\nComisión: $${ganancia.toLocaleString()} (${mision.comision}%)\n\nEscrow automático + Validación IA. Sin riesgo.\n\n👉 partth.com/app/marketplace\n\n#PARTTH #Marketplace #Fintech #Ventas`,
   };
 }
 

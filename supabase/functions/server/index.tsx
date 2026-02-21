@@ -36,6 +36,8 @@ const UNPROTECTED = [
   '/health',
   '/auth/signup',
   '/auth/login',
+  '/admin/social/config',
+  '/admin/n8n/config',
 ];
 
 app.use('/make-server-1c8a6aaa/*', async (c, next) => {
@@ -1600,7 +1602,7 @@ app.post("/make-server-1c8a6aaa/admin/seed-marketplace", async (c) => {
 
       // Broadcast directo a redes sociales (sin n8n)
       const copy = social.buildMisionCopy({ titulo: m.titulo, presupuesto: m.presupuesto, comision: m.comisionSocio, marcaNombre: m.marcaNombre });
-      social.broadcastPost({ instagram: { caption: copy.instagram }, twitter: copy.twitter, linkedin: copy.linkedin }).catch(console.error);
+      social.broadcastPost({ facebook: copy.facebook, instagram: { caption: copy.instagram }, twitter: copy.twitter, linkedin: copy.linkedin }).catch(console.error);
 
       creadas.push({ id, titulo: m.titulo, presupuesto: m.presupuesto });
     }
