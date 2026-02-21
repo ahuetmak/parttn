@@ -38,6 +38,9 @@ const UNPROTECTED = [
   '/auth/login',
   '/admin/social/config',
   '/admin/n8n/config',
+  '/admin/seed-marketplace',
+  '/ofertas',
+  '/social/status',
 ];
 
 app.use('/make-server-1c8a6aaa/*', async (c, next) => {
