@@ -731,6 +731,107 @@ export function Landing() {
         </div>
       </section>
 
+      {/* ── COMPETITIVE TABLE ─────────────────────────────────────────────── */}
+      <section className="py-28 px-6 bg-black">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-flex items-center gap-2 mb-5 px-5 py-2 rounded-full border border-[#00F2A6]/30 bg-[#00F2A6]/5">
+              <span className="text-[#00F2A6] font-bold text-xs tracking-[0.2em] uppercase">Ventaja Competitiva</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
+              Por qué PARTTH<br />
+              <span className="bg-gradient-to-r from-[#00F2A6] to-[#0EA5E9] bg-clip-text text-transparent">es la única opción real</span>
+            </h2>
+            <p className="text-zinc-400 text-xl max-w-2xl mx-auto">
+              Las otras plataformas prometen. PARTTH garantiza con fondos reales bloqueados.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="overflow-x-auto rounded-3xl border border-zinc-800/60"
+          >
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-zinc-800/60">
+                  <th className="text-left px-6 py-5 text-zinc-500 text-sm font-bold uppercase tracking-wider">Característica</th>
+                  <th className="px-6 py-5 text-center text-zinc-500 text-sm font-bold uppercase tracking-wider">Upwork</th>
+                  <th className="px-6 py-5 text-center text-zinc-500 text-sm font-bold uppercase tracking-wider">Fiverr</th>
+                  <th className="px-6 py-5 text-center text-sm font-bold uppercase tracking-wider relative">
+                    <div className="absolute inset-0 bg-[#00F2A6]/5 border-x border-[#00F2A6]/20" />
+                    <span className="relative bg-gradient-to-r from-[#00F2A6] to-[#0EA5E9] bg-clip-text text-transparent">PARTTH</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { feature: 'Escrow Real (fondos bloqueados)', upwork: false, fiverr: false, partth: true },
+                  { feature: 'Evidencia Obligatoria por tarea', upwork: false, fiverr: false, partth: true },
+                  { feature: 'Validación IA de entregables', upwork: false, fiverr: false, partth: true },
+                  { feature: 'Comisión de la plataforma', upwork: '20%', fiverr: '20%', partth: '15%' },
+                  { feature: 'Sala Digital colaborativa', upwork: false, fiverr: false, partth: true },
+                  { feature: 'IA Asistente para ventas', upwork: false, fiverr: false, partth: true },
+                  { feature: 'Split automático 85/15', upwork: false, fiverr: false, partth: true },
+                  { feature: 'Resolución de disputas IA', upwork: false, fiverr: false, partth: true },
+                  { feature: 'Reputación inmutable', upwork: false, fiverr: false, partth: true },
+                ].map((row, i) => (
+                  <tr key={i} className="border-b border-zinc-900/60 hover:bg-zinc-900/20 transition-colors">
+                    <td className="px-6 py-4 text-zinc-300 text-sm font-medium">{row.feature}</td>
+                    <td className="px-6 py-4 text-center">
+                      {typeof row.upwork === 'string'
+                        ? <span className="text-zinc-400 font-bold">{row.upwork}</span>
+                        : <span className="text-2xl">{row.upwork ? '✅' : '❌'}</span>}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {typeof row.fiverr === 'string'
+                        ? <span className="text-zinc-400 font-bold">{row.fiverr}</span>
+                        : <span className="text-2xl">{row.fiverr ? '✅' : '❌'}</span>}
+                    </td>
+                    <td className="px-6 py-4 text-center relative">
+                      <div className="absolute inset-0 bg-[#00F2A6]/3 border-x border-[#00F2A6]/15" />
+                      <span className="relative">
+                        {typeof row.partth === 'string'
+                          ? <span className="text-[#00F2A6] font-black text-lg">{row.partth}</span>
+                          : <span className="text-2xl">{row.partth ? '✅' : '❌'}</span>}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-[#00F2A6]/5">
+                  <td className="px-6 py-5 text-white font-black text-sm">RESULTADO</td>
+                  <td className="px-6 py-5 text-center text-zinc-500 font-bold text-sm">Promesas sin garantía</td>
+                  <td className="px-6 py-5 text-center text-zinc-500 font-bold text-sm">Promesas sin garantía</td>
+                  <td className="px-6 py-5 text-center relative">
+                    <div className="absolute inset-0 bg-[#00F2A6]/5 border-x border-[#00F2A6]/20" />
+                    <span className="relative text-[#00F2A6] font-black text-sm">Certeza Absoluta ✦</span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </motion.div>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+            className="text-center text-zinc-600 text-sm mt-6"
+          >
+            PARTTH es la <span className="text-white font-semibold">primera plataforma</span> que combina escrow real + evidencia obligatoria + IA en un solo ecosistema.
+          </motion.p>
+        </div>
+      </section>
+
       {/* ── FINAL CTA ─────────────────────────────────────────────────────── */}
       <section className="py-36 px-6 bg-black relative overflow-hidden">
         <motion.div
@@ -784,8 +885,8 @@ export function Landing() {
       {/* ── FOOTER ────────────────────────────────────────────────────────── */}
       <footer className="border-t border-zinc-900 py-16 px-6 bg-black">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-12">
-            <div className="md:col-span-2">
+          <div className="grid md:grid-cols-5 gap-8 mb-12">
+            <div className="md:col-span-2" style={{ gridColumn: 'span 2' }}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00F2A6] to-[#0EA5E9] flex items-center justify-center shadow-lg shadow-[#00F2A6]/30">
                   <Logo size={24} className="text-black" />
@@ -810,20 +911,46 @@ export function Landing() {
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-black mb-4 text-sm tracking-wider uppercase">Legal</h3>
+              <h3 className="text-white font-black mb-4 text-sm tracking-wider uppercase">Empresa</h3>
               <ul className="space-y-3 text-zinc-500 text-sm">
+                <li><Link to="/about" className="hover:text-[#00F2A6] transition-colors">Quiénes Somos</Link></li>
+                <li><Link to="/como-funciona" className="hover:text-[#00F2A6] transition-colors">Cómo Funciona</Link></li>
                 <li><Link to="/terms" className="hover:text-[#00F2A6] transition-colors">Términos de Servicio</Link></li>
                 <li><Link to="/privacy" className="hover:text-[#00F2A6] transition-colors">Política de Privacidad</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-white font-black mb-4 text-sm tracking-wider uppercase">Contacto</h3>
+              <ul className="space-y-3 text-zinc-500 text-sm">
+                <li>
+                  <a href="mailto:support@partth.com" className="hover:text-[#00F2A6] transition-colors flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#00F2A6] flex-shrink-0" />
+                    support@partth.com
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:admin@partth.com" className="hover:text-[#00F2A6] transition-colors flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0EA5E9] flex-shrink-0" />
+                    admin@partth.com
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:legal@partth.com" className="hover:text-[#00F2A6] transition-colors flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-600 flex-shrink-0" />
+                    legal@partth.com
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
 
           <div className="border-t border-zinc-900 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-zinc-700 text-sm">
-              © 2026 PARTTH Inc. Todos los derechos reservados.
+              © 2026 PARTTH Inc. Todos los derechos reservados. · <span className="text-zinc-600">partth.com</span>
             </p>
             <p className="text-zinc-700 text-xs">
-              Comisión PARTTH: <span className="text-[#00F2A6] font-bold">15%</span> · Bloqueada en escrow hasta validación IA ≥ 90%
+              "No Evidence, No Payment" · Comisión: <span className="text-[#00F2A6] font-bold">15%</span> · Escrow IA ≥ 90%
             </p>
           </div>
         </div>

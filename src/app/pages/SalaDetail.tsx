@@ -12,6 +12,7 @@ import { salasAPI } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 import { AcuerdoOperativo } from '../components/AcuerdoOperativo';
 import { EvidenciaModule } from '../components/EvidenciaModule';
+import { CapsulaDeMision } from '../components/CapsulaDeMision';
 import { toast } from 'sonner';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -328,6 +329,17 @@ export function SalaDetail() {
         <ChevronRight className="w-4 h-4" />
         <span className="text-white font-semibold">War Room #{sala.id.slice(0, 8)}</span>
       </div>
+
+      {/* ── Cápsula de Misión IA ──────────────────────────────────────── */}
+      <CapsulaDeMision
+        sala={sala}
+        onGenerateStrategy={() => {
+          toast.success('⚡ Estrategia de venta generada por IA', {
+            description: 'Revisa los 3 enfoques en la cápsula de misión',
+            duration: 4000,
+          });
+        }}
+      />
 
       {/* ── Header Glassmorphism ───────────────────────────────────────── */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
