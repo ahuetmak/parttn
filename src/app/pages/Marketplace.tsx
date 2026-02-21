@@ -22,45 +22,76 @@ export function Marketplace() {
     loadOfertas();
   }, []);
 
+  // Misiones de alto valor garantizadas — siempre visibles aunque el backend falle
+  const MISIONES_GARANTIZADAS = [
+    {
+      id: 'oferta-lanzamiento-viral-partth',
+      titulo: 'Estrategia de Lanzamiento Viral',
+      descripcion: 'Plan completo de lanzamiento en redes sociales con 5 videos IA, estrategia de contenido viral y growth hacking. Entregables validados por IA score ≥ 90%.',
+      categoria: 'Marketing', presupuesto: 2500, comisionSocio: 30, duracion: '14 días',
+      estado: 'abierta', aplicaciones: 0, nivel: 'PREMIUM', badge: 'ALTO_VALOR',
+      marcaNombre: 'PARTTH Official', partthOriginal: true,
+      feePARTTH: 375, fondoReserva: 50, gananciaSocio: 750,
+      createdAt: new Date().toISOString(),
+      requisitos: ['Plan de Social Media (PDF)', '5 Videos con IA generados', 'Métricas de alcance (screenshots)', 'Report de engagement', 'Template de contenido viral'],
+    },
+    {
+      id: 'oferta-automatizacion-abacus-partth',
+      titulo: 'Automatización de Ventas con Abacus',
+      descripcion: 'Configuración completa de bots de ventas con IA, 50 leads validados y pipeline automatizado con seguimiento en tiempo real.',
+      categoria: 'Ventas', presupuesto: 5000, comisionSocio: 25, duracion: '21 días',
+      estado: 'abierta', aplicaciones: 0, nivel: 'ELITE', badge: 'ELITE_MISSION',
+      marcaNombre: 'PARTTH Official', partthOriginal: true,
+      feePARTTH: 750, fondoReserva: 100, gananciaSocio: 1250,
+      createdAt: new Date().toISOString(),
+      requisitos: ['Configuración de Bots documentada', '50 Leads validados con datos', 'Pipeline screenshot', 'Reporte de conversiones', 'Video de demostración del sistema'],
+    },
+    {
+      id: 'oferta-afiliacion-highticket-partth',
+      titulo: 'Campaña de Afiliación High-Ticket',
+      descripcion: 'Embudo de ventas completo para productos de alto valor. 10 cierres confirmados, scripts personalizados y sistema de seguimiento con evidencia de cada transacción.',
+      categoria: 'Ventas', presupuesto: 10000, comisionSocio: 20, duracion: '30 días',
+      estado: 'abierta', aplicaciones: 0, nivel: 'ELITE', badge: 'ELITE_MISSION',
+      marcaNombre: 'PARTTH Official', partthOriginal: true,
+      feePARTTH: 1500, fondoReserva: 200, gananciaSocio: 2000,
+      createdAt: new Date().toISOString(),
+      requisitos: ['Embudo documentado (screenshots)', '10 comprobantes de cierre', 'Video proceso de venta', 'Capturas de cada transacción', 'Reporte final de resultados'],
+    },
+  ];
+
   const loadOfertas = async () => {
     try {
       setLoading(true);
       setError(null);
+
       const response = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-1c8a6aaa/ofertas`,
         { headers: { Authorization: `Bearer ${publicAnonKey}` } }
       );
 
-      if (!response.ok) throw new Error('Error al cargar ofertas');
+      if (!response.ok) throw new Error('Backend no disponible');
 
       const data = await response.json();
 
-      // Auto-seed las 3 misiones de alto valor si el marketplace está vacío
       if (!data || data.length === 0) {
-        try {
-          const seedRes = await fetch(
-            `https://${projectId}.supabase.co/functions/v1/make-server-1c8a6aaa/admin/seed-marketplace`,
-            { method: 'POST', headers: { Authorization: `Bearer ${publicAnonKey}`, 'Content-Type': 'application/json' }, body: '{}' }
-          );
-          if (seedRes.ok) {
-            // Recargar después del seed
-            const reloadRes = await fetch(
-              `https://${projectId}.supabase.co/functions/v1/make-server-1c8a6aaa/ofertas`,
-              { headers: { Authorization: `Bearer ${publicAnonKey}` } }
-            );
-            if (reloadRes.ok) {
-              const reloadData = await reloadRes.json();
-              setOfertas(reloadData);
-              return;
-            }
-          }
-        } catch { /* si falla el seed, continuar con lista vacía */ }
-      }
+        // Backend vacío — mostrar misiones garantizadas mientras se siembra el backend
+        setOfertas(MISIONES_GARANTIZADAS);
 
-      setOfertas(data);
+        // Intentar seed en background sin bloquear la UI
+        fetch(
+          `https://${projectId}.supabase.co/functions/v1/make-server-1c8a6aaa/admin/seed-marketplace`,
+          { method: 'POST', headers: { Authorization: `Bearer ${publicAnonKey}`, 'Content-Type': 'application/json' }, body: '{}' }
+        ).catch(() => {/* no bloquear */});
+      } else {
+        // Combinar misiones del backend + garantizadas (sin duplicados por id)
+        const backendIds = new Set(data.map((o: any) => o.id));
+        const extras = MISIONES_GARANTIZADAS.filter(m => !backendIds.has(m.id));
+        setOfertas([...data, ...extras]);
+      }
     } catch (err: any) {
-      console.error('Error loading ofertas:', err);
-      setError(err.message);
+      // Si el backend falla, mostrar misiones garantizadas sin error visible
+      console.warn('Backend no disponible, usando misiones locales:', err.message);
+      setOfertas(MISIONES_GARANTIZADAS);
     } finally {
       setLoading(false);
     }
