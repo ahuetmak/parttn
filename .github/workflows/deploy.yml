@@ -54,6 +54,9 @@ jobs:
         with:
           version: latest
 
+      - name: Prepare function folder (rename server → make-server-1c8a6aaa)
+        run: cp -r supabase/functions/server supabase/functions/make-server-1c8a6aaa
+
       - name: Deploy Edge Function
         run: |
           supabase functions deploy make-server-1c8a6aaa \
