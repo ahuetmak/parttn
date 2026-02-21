@@ -42,6 +42,10 @@ jobs:
   deploy-backend:
     runs-on: ubuntu-latest
     name: Backend → Supabase Edge Function
+    # No bloquea el frontend si falla
+    continue-on-error: true
+    # Solo corre si el token está configurado
+    if: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
