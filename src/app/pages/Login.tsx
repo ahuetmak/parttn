@@ -21,12 +21,21 @@ export function Login() {
     const { error: signInError } = await signIn(email, password);
 
     if (signInError) {
-      setError('Email o contraseña incorrectos');
+      const msg = signInError?.message || signInError?.toString() || '';
+      if (msg.includes('Email not confirmed') || msg.includes('email_not_confirmed')) {
+        setError('Confirma tu email primero — revisa tu bandeja de entrada. Si no lo encuentras, revisa spam.');
+      } else if (msg.includes('Invalid login') || msg.includes('invalid_credentials')) {
+        setError('Email o contraseña incorrectos. ¿Ya tienes cuenta? Verifica tus datos.');
+      } else if (msg.includes('rate limit') || msg.includes('too many')) {
+        setError('Demasiados intentos. Espera 5 minutos e intenta de nuevo.');
+      } else {
+        setError(`Error de acceso: ${msg || 'Intenta de nuevo'}`);
+      }
       setLoading(false);
       return;
     }
 
-    navigate('/dashboard');
+    navigate('/app');
   };
 
   const handleGoogleSignIn = async () => {

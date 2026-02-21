@@ -125,15 +125,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
+      // URL canónica de producción para evitar errores de redirect
+      const isProd = window.location.hostname !== 'localhost';
+      const redirectTo = isProd
+        ? 'https://partth.com/role-selection'
+        : 'http://localhost:5173/role-selection';
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: window.location.origin + '/role-selection',
-        },
+        options: { redirectTo },
       });
 
       if (error) return { error };
-
       return { error: null };
     } catch (error) {
       return { error };
