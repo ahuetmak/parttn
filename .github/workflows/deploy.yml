@@ -54,8 +54,11 @@ jobs:
         with:
           version: latest
 
-      - name: Prepare function folder (rename server → make-server-1c8a6aaa)
-        run: cp -r supabase/functions/server supabase/functions/make-server-1c8a6aaa
+      - name: Prepare function folder (server → make-server-1c8a6aaa con index.ts)
+        run: |
+          mkdir -p supabase/functions/make-server-1c8a6aaa
+          cp supabase/functions/server/*.tsx supabase/functions/make-server-1c8a6aaa/
+          cp supabase/functions/make-server-1c8a6aaa/index.tsx supabase/functions/make-server-1c8a6aaa/index.ts
 
       - name: Deploy Edge Function
         run: |
